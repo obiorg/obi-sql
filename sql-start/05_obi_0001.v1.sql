@@ -203,6 +203,71 @@ CREATE INDEX cities_test_ibfk_2 ON cities (country_id ASC);
 GO  
 
 
+-------------------------------------------------------------------------------
+--
+-- CREATION DE LA TABLE locations
+--
+-- Description : 
+-- location allow to group and define a unique point of identification
+-- base on regions, subregion, countries, states, cities, road, number, 
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS locations;
+GO
+CREATE TABLE locations (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  [location] varchar(45)  DEFAULT NULL,
+  designation varchar(255)  DEFAULT NULL,
+
+  -- Arrange as location group
+  [group]	varchar(45)		DEFAULT NULL, 
+
+  country	INT NOT NULL,
+  [state]	INT NOT NULL,
+  [city]	INT NOT NULL,
+
+  [address]	VARCHAR(255)	DEFAULT NULL,
+  address1	VARCHAR(255)	DEFAULT NULL,
+  address3	VARCHAR(255)	DEFAULT NULL,
+
+  [bloc]	varchar(45)		DEFAULT NULL,
+  [floor]	INT				DEFAULT NULL,
+  [number]	varchar(45)		DEFAULT NULL,
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_locations_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys
+  CONSTRAINT fk_locations_country FOREIGN KEY (country) REFERENCES countries (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_locations_state FOREIGN KEY (state) REFERENCES states (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_locations_city FOREIGN KEY (city) REFERENCES cities (id) ON UPDATE NO ACTION, 
+);
+
+GO
+CREATE TRIGGER tgr_locations_changed ON locations
+	AFTER UPDATE AS UPDATE locations
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_locations_id ON locations (id ASC);
+
+CREATE INDEX i_locations_location ON locations (location ASC);
+CREATE INDEX i_locations_country ON locations (country ASC);
+CREATE INDEX i_locations_state ON locations (state ASC);
+CREATE INDEX i_locations_city ON locations (city ASC);
+CREATE INDEX i_locations_created ON locations (created ASC);
+CREATE INDEX i_locations_changed ON locations (changed ASC);
+GO  
+
+
 
 
 -------------------------------------------------------------------------------
@@ -239,17 +304,13 @@ CREATE TABLE entities (
   logoPath		VARCHAR(512) DEFAULT NULL,	
 
   -- country, state, city base on existing world database
-  country		INT DEFAULT NULL,
-  [state]		INT DEFAULT NULL,
-  [city]		INT DEFAULT NULL
+  [location]	INT DEFAULT NULL,
   
   -- MANAGING KEYS
   CONSTRAINT pk_entities_entity PRIMARY KEY CLUSTERED (entity asc),
 
   -- Foreign keys
-  CONSTRAINT fk_entities_country FOREIGN KEY (country) REFERENCES countries (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_entities_state FOREIGN KEY ([state]) REFERENCES states (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_entities_city FOREIGN KEY ([city]) REFERENCES dbo.cities (id) ON UPDATE NO ACTION
+  CONSTRAINT fk_entities_location FOREIGN KEY (location) REFERENCES locations (id) ON UPDATE NO ACTION
   
 );
 
@@ -263,7 +324,7 @@ CREATE UNIQUE INDEX ui_entities_id ON entities (id ASC);
 CREATE UNIQUE INDEX ui_entities_entity ON entities (entity ASC);
 
 CREATE INDEX i_entities_created ON entities (created ASC);
-CREATE INDEX i_entities_changed ON entities (created ASC);
+CREATE INDEX i_entities_changed ON entities (changed ASC);
 GO  
 
 
@@ -313,10 +374,9 @@ CREATE TABLE businesses (
   -- path file name of businesses logo
   logoPath		VARCHAR(512) DEFAULT NULL,	
 
+
   -- country, state, city base on existing world database
-  country		INT DEFAULT NULL,
-  [state]		INT DEFAULT NULL,
-  [city]		INT DEFAULT NULL,
+  [location]	INT DEFAULT NULL,
   
   -- entity to which refer the business
   entity		VARCHAR(45)	NOT NULL,
@@ -325,9 +385,7 @@ CREATE TABLE businesses (
   CONSTRAINT pk_businesses_id PRIMARY KEY CLUSTERED (id asc),
 
   -- Foreign keys
-  CONSTRAINT fk_businesses_country FOREIGN KEY (country) REFERENCES countries (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_businesses_state FOREIGN KEY ([state]) REFERENCES states (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_businesses_city FOREIGN KEY ([city]) REFERENCES cities (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_businesses_location FOREIGN KEY (location) REFERENCES locations (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_businesses_entity FOREIGN KEY (entity) REFERENCES entities (entity) ON UPDATE CASCADE
   
 );
@@ -342,7 +400,7 @@ CREATE UNIQUE INDEX ui_businesses_id ON businesses (id ASC);
 CREATE UNIQUE INDEX ui_businesses_business ON businesses (entity ASC, business ASC);
 
 CREATE INDEX i_businesses_created ON businesses (created ASC);
-CREATE INDEX i_businesses_changed ON businesses (created ASC);
+CREATE INDEX i_businesses_changed ON businesses (changed ASC);
 GO  
 
 
@@ -397,9 +455,9 @@ CREATE TABLE companies (
   -- path file name of companies logo
   logoPath		VARCHAR(512) DEFAULT NULL,	
 
+
   -- country, state, city base on existing world database
-  [state]		INT DEFAULT NULL,
-  [city]		INT DEFAULT NULL,
+  [location]	INT DEFAULT NULL,
   
   -- business id where entity and company are specified
   business		INT	NOT NULL,
@@ -408,8 +466,7 @@ CREATE TABLE companies (
   CONSTRAINT pk_companies_id PRIMARY KEY CLUSTERED (id asc),
 
   -- Foreign keys
-  CONSTRAINT fk_companies_state FOREIGN KEY ([state]) REFERENCES states (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_companies_city FOREIGN KEY ([city]) REFERENCES cities (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_companies_location FOREIGN KEY (location) REFERENCES locations (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_companies_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION
   
 );
@@ -424,7 +481,7 @@ CREATE UNIQUE INDEX ui_companies_id ON companies (id ASC);
 CREATE UNIQUE INDEX ui_companies_company ON companies (business ASC, company ASC);
 
 CREATE INDEX i_companies_created ON companies (created ASC);
-CREATE INDEX i_companies_changed ON companies (created ASC);
+CREATE INDEX i_companies_changed ON companies (changed ASC);
 GO  
 
 
@@ -484,7 +541,7 @@ GO
 CREATE UNIQUE INDEX ui_user_hashing_algorithms_id ON user_hashing_algorithms (id ASC);
 CREATE INDEX i_user_hashing_algorithms_name ON user_hashing_algorithms (algorithmName ASC);
 CREATE INDEX i_user_hashing_algorithms_created ON user_hashing_algorithms (created ASC);
-CREATE INDEX i_user_hashing_algorithms_changed ON user_hashing_algorithms (created ASC);
+CREATE INDEX i_user_hashing_algorithms_changed ON user_hashing_algorithms (changed ASC);
 GO  
 
 
@@ -527,7 +584,7 @@ GO
 CREATE UNIQUE INDEX ui_user_email_verified_id ON user_email_verified (id ASC);
 CREATE INDEX i_user_email_verified_statusDescription ON user_email_verified (statusDescription ASC);
 CREATE INDEX i_user_email_verified_created ON user_email_verified (created ASC);
-CREATE INDEX i_user_email_verified_changed ON user_email_verified (created ASC);
+CREATE INDEX i_user_email_verified_changed ON user_email_verified (changed ASC);
 GO  
 
 
@@ -593,7 +650,7 @@ CREATE UNIQUE INDEX ui_user_login_data_id ON user_login_data (id ASC);
 CREATE INDEX i_user_login_data_loginName ON user_login_data (loginName ASC);
 CREATE INDEX i_user_login_data_email ON user_login_data (email ASC);
 CREATE INDEX i_user_login_data_created ON user_login_data (created ASC);
-CREATE INDEX i_user_login_data_changed ON user_login_data (created ASC);
+CREATE INDEX i_user_login_data_changed ON user_login_data (changed ASC);
 GO  
 
 
@@ -648,7 +705,7 @@ GO
 CREATE UNIQUE INDEX ui_user_external_providers_id ON user_external_providers (id ASC);
 CREATE INDEX i_user_external_providers_statusDescription ON user_external_providers ([name] ASC);
 CREATE INDEX i_user_external_providers_created ON user_external_providers (created ASC);
-CREATE INDEX i_user_external_providers_changed ON user_external_providers (created ASC);
+CREATE INDEX i_user_external_providers_changed ON user_external_providers (changed ASC);
 GO  
 
 
@@ -695,7 +752,7 @@ GO
 CREATE UNIQUE INDEX ui_user_login_data_external_id ON user_login_data_external (id ASC);
 CREATE INDEX i_user_login_data_external_loginName ON user_login_data_external ([externalProvider] ASC);
 CREATE INDEX i_user_login_data_external_created ON user_login_data_external (created ASC);
-CREATE INDEX i_user_login_data_external_changed ON user_login_data_external (created ASC);
+CREATE INDEX i_user_login_data_external_changed ON user_login_data_external (changed ASC);
 GO  
 
 
@@ -749,7 +806,7 @@ CREATE INDEX i_user_permissions_name ON user_permissions ([name] ASC);
 CREATE INDEX i_user_permissions_designation ON user_permissions (designation ASC);
 CREATE INDEX i_user_permissions_parent ON user_permissions (parent ASC);
 CREATE INDEX i_user_permissions_created ON user_permissions (created ASC);
-CREATE INDEX i_user_permissions_changed ON user_permissions (created ASC);
+CREATE INDEX i_user_permissions_changed ON user_permissions (changed ASC);
 GO  
 
 
@@ -811,7 +868,7 @@ CREATE INDEX i_user_roles_ent_bui_com ON user_roles (entity ASC, business ASC, c
 CREATE INDEX i_user_roles_name ON user_roles ([name] ASC);
 CREATE INDEX i_user_roles_description ON user_roles ([description] ASC);
 CREATE INDEX i_user_roles_created ON user_roles (created ASC);
-CREATE INDEX i_user_roles_changed ON user_roles (created ASC);
+CREATE INDEX i_user_roles_changed ON user_roles (changed ASC);
 GO  
 
 
@@ -871,7 +928,7 @@ CREATE INDEX i_user_role_permissions_ent_bui_com ON user_roles (entity ASC, busi
 CREATE INDEX i_user_role_permissions_permission ON user_role_permissions (permission ASC);
 CREATE INDEX i_user_role_permissions_role ON user_role_permissions ([role] ASC);
 CREATE INDEX i_user_role_permissions_created ON user_role_permissions (created ASC);
-CREATE INDEX i_user_role_permissions_changed ON user_role_permissions (created ASC);
+CREATE INDEX i_user_role_permissions_changed ON user_role_permissions (changed ASC);
 GO  
 
 
@@ -931,7 +988,7 @@ CREATE INDEX i_user_account_lastName ON user_account (lastName ASC);
 CREATE INDEX i_user_account_genre ON user_account (genre ASC);
 CREATE INDEX i_user_account_dateOfBirth ON user_account (dateOfBirth ASC);
 CREATE INDEX i_user_account_created ON user_account (created ASC);
-CREATE INDEX i_user_account_changed ON user_account (created ASC);
+CREATE INDEX i_user_account_changed ON user_account (changed ASC);
 GO  
 
 
@@ -979,6 +1036,6 @@ CREATE UNIQUE INDEX ui_user_account_role_id ON user_account_role (id ASC);
 CREATE INDEX i_user_account_role_user ON user_account_role ([user] ASC);
 CREATE INDEX i_user_account_role_role ON user_account_role ([role] ASC);
 CREATE INDEX i_user_account_role_created ON user_account_role (created ASC);
-CREATE INDEX i_user_account_role_changed ON user_account_role (created ASC);
+CREATE INDEX i_user_account_role_changed ON user_account_role (changed ASC);
 GO  
 
