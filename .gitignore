@@ -1,1 +1,13 @@
+
+## Ignore source document for databse countries
+sql-start/dr5hn-countries-states-cities-database
 sql-start/dr5hn-countries-states-cities-database/*
+
+## Ignore visual studio history
+.vs
+.vs/*
+
+.history
+
+
+

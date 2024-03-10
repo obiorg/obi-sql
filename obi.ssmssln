@@ -1,0 +1,23 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# SQL Server Management Studio Solution File, Format Version 19.00
+VisualStudioVersion = 15.0.28307.421
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{4F2E2C19-372F-40D8-9FA7-9D2138C6997A}") = "obi-start", "sql-start\obi-start.ssmssqlproj", "{F58D13AA-4CBE-4AFF-BF88-4758D60DBAF5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Default|Default = Default|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DA9CFF2A-3D37-4194-AF37-4BB3A8576223}.Default|Default.ActiveCfg = Default
+		{4A8B20F9-EFFA-46DB-8703-151A6D81A120}.Default|Default.ActiveCfg = Default
+		{F58D13AA-4CBE-4AFF-BF88-4758D60DBAF5}.Default|Default.ActiveCfg = Default
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1F8E4433-91C2-40B6-84E4-672911595490}
+	EndGlobalSection
+EndGlobal

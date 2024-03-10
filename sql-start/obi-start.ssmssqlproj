@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<SqlWorkbenchSqlProject xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Name="obi-start">
+  <Items>
+    <LogicalFolder Name="Connexions" Type="2" Sorted="true">
+      <Items>
+        <ConnectionNode Name="BLCLPT19103:sa">
+          <Created>2024-01-14T11:56:24.2123898+01:00</Created>
+          <Type>SQL</Type>
+          <Server>BLCLPT19103</Server>
+          <UserName>sa</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>30</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName />
+        </ConnectionNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Requêtes" Type="0" Sorted="true">
+      <Items>
+        <FileNode Name="01_world_0001.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>01_world_0001.sql</FullPath>
+        </FileNode>
+        <FileNode Name="05_obi_0001.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>05_obi_0001.sql</FullPath>
+        </FileNode>
+        <FileNode Name="05_obi_0001.v1.sql">
+          <AssociatedConnectionMoniker />
+          <AssociatedConnSrvName />
+          <AssociatedConnUserName />
+          <FullPath>05_obi_0001.v1.sql</FullPath>
+        </FileNode>
+        <FileNode Name="05_prisma_0001.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>05_prisma_0001.sql</FullPath>
+        </FileNode>
+        <FileNode Name="20_obi_fill_0001.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>20_obi_fill_0001.sql</FullPath>
+        </FileNode>
+        <FileNode Name="20_prisma_fill_0001.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>20_prisma_fill_0001.sql</FullPath>
+        </FileNode>
+      </Items>
+    </LogicalFolder>
+    <LogicalFolder Name="Divers" Type="3" Sorted="true">
+      <Items />
+    </LogicalFolder>
+  </Items>
+</SqlWorkbenchSqlProject>
