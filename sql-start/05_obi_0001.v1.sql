@@ -2,10 +2,18 @@
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA BASE DE DONNEE OBI
+-- CREATION DE LA BASE DE DONNEE OBI
 --
 -------------------------------------------------------------------------------
 USE master;
+
+DECLARE @kill varchar(8000) = '';  
+SELECT @kill = @kill + 'kill ' + CONVERT(varchar(5), session_id) + ';'  
+FROM sys.dm_exec_sessions
+WHERE database_id  = db_id('OBI')
+
+EXEC(@kill);
+
 GO
 DROP DATABASE IF EXISTS OBI
 GO
@@ -23,7 +31,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE REGIONS
+-- CREATION DE LA TABLE loc_regions
 --
 -- Description : 
 -- 
@@ -32,9 +40,9 @@ GO
 -- 
 -------------------------------------------------------------------------------
 GO
-DROP TABLE IF EXISTS regions;
+DROP TABLE IF EXISTS loc_regions;
 GO
-CREATE TABLE regions (
+CREATE TABLE loc_regions (
   id INT NOT NULL IDENTITY(1,1) UNIQUE,
   [name] varchar(100)   NOT NULL,
   translations text  ,
@@ -48,7 +56,7 @@ CREATE TABLE regions (
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE SUBREGIONS
+-- CREATION DE LA TABLE loc_subregions
 --
 -- Description : 
 -- 
@@ -57,9 +65,9 @@ CREATE TABLE regions (
 -- 
 -------------------------------------------------------------------------------
 GO
-DROP TABLE IF EXISTS subregions;
+DROP TABLE IF EXISTS loc_subregions;
 GO
-CREATE TABLE subregions (
+CREATE TABLE loc_subregions (
   id INT NOT NULL IDENTITY(1,1) UNIQUE,
   [name] varchar(100)   NOT NULL,
   translations text  ,
@@ -69,10 +77,10 @@ CREATE TABLE subregions (
   flag bit NOT NULL DEFAULT '1',
   wikiDataId varchar(255)   DEFAULT NULL ,
   PRIMARY KEY (id),
-  CONSTRAINT subregion_continent_final FOREIGN KEY (region_id) REFERENCES regions (id)
+  CONSTRAINT loc_subregion_continent_final FOREIGN KEY (region_id) REFERENCES loc_regions (id)
 )
 GO
-CREATE INDEX subregion_continent ON subregions (region_id ASC);
+CREATE INDEX loc_subregion_continent ON loc_subregions (region_id ASC);
 GO 
 
 
@@ -80,7 +88,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE COUNTRIES
+-- CREATION DE LA TABLE loc_countries
 --
 -- Description : 
 -- 
@@ -89,9 +97,9 @@ GO
 -- 
 -------------------------------------------------------------------------------
 GO
-DROP TABLE IF EXISTS countries;
+DROP TABLE IF EXISTS loc_countries;
 GO
-CREATE TABLE countries (
+CREATE TABLE loc_countries (
   id INT NOT NULL IDENTITY(1,1) UNIQUE,
   [name] varchar(100)   NOT NULL,
   iso3 char(3)   DEFAULT NULL,
@@ -121,12 +129,12 @@ CREATE TABLE countries (
   wikiDataId varchar(255)   DEFAULT NULL ,
   PRIMARY KEY (id),
 
-  CONSTRAINT country_continent_final FOREIGN KEY (region_id) REFERENCES regions (id),
-  CONSTRAINT country_subregion_final FOREIGN KEY (subregion_id) REFERENCES subregions (id)
+  CONSTRAINT country_continent_final FOREIGN KEY (region_id) REFERENCES loc_regions (id),
+  CONSTRAINT country_subregion_final FOREIGN KEY (subregion_id) REFERENCES loc_subregions (id)
 )
 GO
-CREATE  INDEX country_continent ON countries (region_id ASC);
-CREATE  INDEX country_subregion ON countries (subregion_id ASC);
+CREATE  INDEX country_continent ON loc_countries (region_id ASC);
+CREATE  INDEX country_subregion ON loc_countries (subregion_id ASC);
 GO 
 
 
@@ -134,7 +142,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE STATES
+-- CREATION DE LA TABLE loc_states
 --
 -- Description : 
 -- 
@@ -143,9 +151,9 @@ GO
 -- 
 -------------------------------------------------------------------------------
 GO
-DROP TABLE IF EXISTS states;
+DROP TABLE IF EXISTS loc_states;
 GO
-CREATE TABLE states (
+CREATE TABLE loc_states (
   id INT NOT NULL IDENTITY(1,1) UNIQUE,
   name varchar(255)  NOT NULL,
   country_id INT NOT NULL,
@@ -160,16 +168,16 @@ CREATE TABLE states (
   flag bit NOT NULL DEFAULT '1',
   wikiDataId varchar(255)  DEFAULT NULL ,
   PRIMARY KEY (id),
-  CONSTRAINT country_region_final FOREIGN KEY (country_id) REFERENCES countries (id)
+  CONSTRAINT country_region_final FOREIGN KEY (country_id) REFERENCES loc_countries (id)
 ) 
 GO
-CREATE INDEX country_region ON states (country_id ASC);
+CREATE INDEX country_region ON loc_states (country_id ASC);
 GO 
 
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE CITIES
+-- CREATION DE LA TABLE loc_cities
 --
 -- Description : 
 -- 
@@ -178,9 +186,9 @@ GO
 -- 
 -------------------------------------------------------------------------------
 GO
-DROP TABLE IF EXISTS cities;
+DROP TABLE IF EXISTS loc_cities;
 GO
-CREATE TABLE cities(
+CREATE TABLE loc_cities(
   id INT NOT NULL IDENTITY(1,1) UNIQUE,
   [name] varchar(255)  NOT NULL,
   state_id INT NOT NULL,
@@ -194,12 +202,12 @@ CREATE TABLE cities(
   flag bit NOT NULL DEFAULT '1',
   wikiDataId varchar(255)  DEFAULT NULL ,
   PRIMARY KEY (id),
-  CONSTRAINT cities_ibfk_1 FOREIGN KEY (state_id) REFERENCES states (id),
-  CONSTRAINT cities_ibfk_2 FOREIGN KEY (country_id) REFERENCES countries (id)
+  CONSTRAINT loc_cities_ibfk_1 FOREIGN KEY (state_id) REFERENCES loc_states (id),
+  CONSTRAINT loc_cities_ibfk_2 FOREIGN KEY (country_id) REFERENCES loc_countries (id)
 )
 GO
-CREATE INDEX cities_test_ibfk_1 ON cities (state_id ASC);
-CREATE INDEX cities_test_ibfk_2 ON cities (country_id ASC);
+CREATE INDEX loc_cities_test_ibfk_1 ON loc_cities (state_id ASC);
+CREATE INDEX loc_cities_test_ibfk_2 ON loc_cities (country_id ASC);
 GO  
 
 
@@ -209,7 +217,7 @@ GO
 --
 -- Description : 
 -- location allow to group and define a unique point of identification
--- base on regions, subregion, countries, states, cities, road, number, 
+-- base on loc_regions, loc_subregions, loc_countries, loc_states, loc_cities, road, number, 
 --
 -- Exemple(s) :
 -- 
@@ -220,8 +228,8 @@ GO
 CREATE TABLE locations (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   [location] varchar(45)  DEFAULT NULL,
   designation varchar(255)  DEFAULT NULL,
@@ -246,9 +254,9 @@ CREATE TABLE locations (
   CONSTRAINT pk_locations_id PRIMARY KEY CLUSTERED (id asc),
 
   -- Foreign keys
-  CONSTRAINT fk_locations_country FOREIGN KEY (country) REFERENCES countries (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_locations_state FOREIGN KEY (state) REFERENCES states (id) ON UPDATE NO ACTION,
-  CONSTRAINT fk_locations_city FOREIGN KEY (city) REFERENCES cities (id) ON UPDATE NO ACTION, 
+  CONSTRAINT fk_locations_country FOREIGN KEY (country) REFERENCES loc_countries (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_locations_state FOREIGN KEY (state) REFERENCES loc_states (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_locations_city FOREIGN KEY (city) REFERENCES loc_cities (id) ON UPDATE NO ACTION, 
 );
 
 GO
@@ -272,7 +280,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE ENTITIES
+-- CREATION DE LA TABLE ENTITIES
 --
 -- Description : 
 -- Entities contains all possible entities that want to be manage by the database
@@ -289,8 +297,8 @@ GO
 CREATE TABLE entities (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   entity		VARCHAR(45)		UNIQUE NOT NULL ,
   designation	varchar(255)	DEFAULT NULL ,
@@ -336,7 +344,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE BUSINESSES
+-- CREATION DE LA TABLE BUSINESSES
 --
 -- Description : 
 -- Businesses contains all possible businesses of a defined entities each 
@@ -360,8 +368,8 @@ GO
 CREATE TABLE businesses (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   business		VARCHAR(45)		UNIQUE NOT NULL ,
   designation	varchar(255)	DEFAULT NULL ,
@@ -415,7 +423,7 @@ GO
 
 -------------------------------------------------------------------------------
 --
--- CREACTION DE LA TABLE COMPANIES
+-- CREATION DE LA TABLE COMPANIES
 --
 -- Description : 
 -- Companies contains all possible companies of a defined business which is also
@@ -441,8 +449,8 @@ GO
 CREATE TABLE companies (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   company		VARCHAR(45)		UNIQUE NOT NULL ,
   designation	varchar(255)	DEFAULT NULL ,
@@ -518,8 +526,8 @@ GO
 CREATE TABLE user_hashing_algorithms (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   algorithmName	VARCHAR(10)		NOT NULL ,
   designation	varchar(255)	DEFAULT NULL ,
@@ -563,8 +571,8 @@ GO
 CREATE TABLE user_email_verified (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   statusDescription	VARCHAR(45)	 DEFAULT NULL,
   
@@ -609,8 +617,8 @@ GO
 CREATE TABLE user_login_data (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- Minimal connection mecanism
   loginName		VARCHAR(20)		NOT NULL,
@@ -683,8 +691,8 @@ GO
 CREATE TABLE user_external_providers (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   [name]	VARCHAR(45)	 NOT NULL,
   [wsEndPoint]	VARCHAR(255)	 DEFAULT NULL,
@@ -727,8 +735,8 @@ GO
 CREATE TABLE user_login_data_external (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- provider mecanism
   [externalProvider]	INT NOT NULL,
@@ -779,8 +787,8 @@ GO
 CREATE TABLE user_permissions (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- 
   [name]		VARCHAR(45)		NOT NULL,
@@ -831,8 +839,8 @@ GO
 CREATE TABLE user_roles (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- Application limit
   entity		varchar(45) NULL,
@@ -891,8 +899,8 @@ GO
 CREATE TABLE user_role_permissions (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
   
   -- Application limit
   entity		varchar(45) NULL,
@@ -957,8 +965,8 @@ GO
 CREATE TABLE user_account (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- Name
   firstName		VARCHAR(45)		NOT NULL,
@@ -1011,8 +1019,8 @@ GO
 CREATE TABLE user_account_role (
   id		INT	IDENTITY(1,1) UNIQUE,
   deleted	BIT  DEFAULT 0 ,
-  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
-  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
   
   [user]		INT NOT NULL,
   [role]		INT NOT NULL,
@@ -1038,4 +1046,375 @@ CREATE INDEX i_user_account_role_role ON user_account_role ([role] ASC);
 CREATE INDEX i_user_account_role_created ON user_account_role (created ASC);
 CREATE INDEX i_user_account_role_changed ON user_account_role (changed ASC);
 GO  
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE mach_drivers
+--
+-- Description : 
+-- Pour accéder aux contrôleurs de bas niveau, cela requière la validation d’un
+-- support de communication (méthode de communication). Nous décrirons cela par
+-- un driver.
+-- Un driver va permettre de décrire le moyen utiliser pour atteindre et entrer
+-- en communication avec une machine
+
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS mach_drivers;
+GO
+CREATE TABLE mach_drivers (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  
+  [driver]		varchar(15) not null,
+  [designation]	varchar(255) DEFAULT NULL,
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_mach_drivers_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  -- Foreign keys
+);
+
+GO
+CREATE TRIGGER tgr_mach_drivers_changed ON mach_drivers
+	AFTER UPDATE AS UPDATE mach_drivers
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_mach_drivers_id ON mach_drivers (id ASC);
+CREATE INDEX i_mach_drivers_type ON mach_drivers ([driver] ASC);
+CREATE INDEX i_mach_drivers_designation ON mach_drivers ([designation] ASC);
+CREATE INDEX i_mach_drivers_created ON mach_drivers (created ASC);
+CREATE INDEX i_mach_drivers_changed ON mach_drivers (changed ASC);
+GO  
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE machines
+--
+-- Description : 
+-- machines refer to a description access to machine. Do note mix machine and
+-- equipement which are totally to different concept. 
+-- Machine olding information regarding contrôler (CPU)
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS machines;
+GO
+CREATE TABLE machines (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- Ethernet informations
+  [address]	VARCHAR(15)	NOT NULL,
+  [mask]	VARCHAR(15) DEFAULT NULL,	-- NOT USE
+  [dns]		VARCHAR(45)	DEFAULT NULL,	-- NOT USE
+
+  [ipv6]	VARCHAR(45)	DEFAULT NULL,	-- NOT USE
+  [port]	INT DEFAULT 0,				-- NOT USE
+
+  [name]	VARCHAR(45) DEFAULT NULL,
+
+  -- Rack system as default
+  rack		INT DEFAULT 1,	
+  slot		INT Default 2,
+  [driver]	INT NOT NULL,
+
+  -- Other informations
+  [bus]		INT DEFAULT 0,				-- 
+  [description]	VARCHAR(512) DEFAULT NULL,	-- More comment
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_machines_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_machines_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_machines_driver FOREIGN KEY ([driver]) REFERENCES mach_drivers (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_machines_changed ON machines
+	AFTER UPDATE AS UPDATE machines
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_machines_id ON machines (id ASC);
+CREATE INDEX i_machines_company ON machines ([company] ASC);
+CREATE INDEX i_machines_address ON machines ([address] ASC);
+CREATE INDEX i_machines_company_address ON machines (company asc, [address] ASC);
+CREATE INDEX i_machines_created ON machines (created ASC);
+CREATE INDEX i_machines_changed ON machines (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE tags_tables
+--
+-- Description : 
+-- tags tables refer to a grouper of tags in order to allow to regroup element
+-- in the tag register
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS tags_tables;
+GO
+CREATE TABLE tags_tables (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- Ethernet informations
+  [table]		varchar(45)		NOT NULL,			-- 
+  designation	varchar(255)	DEFAULT NULL,		-- 
+  comment		VARCHAR(512)	DEFAULT NULL,		-- tag comment
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_tags_tables_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_tags_tables_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_tags_tables_changed ON tags_tables
+	AFTER UPDATE AS UPDATE tags_tables
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_tags_tables_id ON tags_tables (id ASC);
+CREATE UNIQUE INDEX ui_tags_tables_company_table ON tags_tables (company asc, [table] asc);
+CREATE INDEX i_tags_tables_company ON tags_tables ([company] ASC);
+CREATE INDEX i_tags_tables_table ON tags_tables ([table] ASC);
+CREATE INDEX i_tags_tables_created ON tags_tables (created ASC);
+CREATE INDEX i_tags_tables_changed ON tags_tables (changed ASC);
+GO  
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE tags_types
+--
+-- Description : 
+-- tags types refer to type of tags in way of int, bool, double, string from
+-- CPU controller
+-- Manage by system
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS tags_types;
+GO
+CREATE TABLE tags_types (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Type information
+  [type]		varchar(45) NOT NULL,			-- INT, REAL, BOOL,...
+  designation	varchar(45) DEFAULT NULL,	-- tag 
+  [bit]			INT DEFAULT 0,		-- tag identify number of bit
+  [byte]		INT DEFAULT 0,		-- tag identify number of byte
+  [word]		INT DEFAULT 0,		-- tag identify number of word
+
+  -- family 
+  [group]		VARCHAR(45)	DEFAULT 'std',		-- Regroup type ex: by brand like family
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_tags_types_id PRIMARY KEY CLUSTERED (id asc),
+
+);
+
+GO
+CREATE TRIGGER tgr_tags_types_changed ON tags_types
+	AFTER UPDATE AS UPDATE tags_types
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_tags_types_id ON tags_types (id ASC);
+CREATE INDEX i_tags_types_type ON tags_types ([type] ASC);
+CREATE INDEX i_tags_types_group ON tags_types ([group] ASC);
+CREATE INDEX i_tags_types_created ON tags_types (created ASC);
+CREATE INDEX i_tags_types_changed ON tags_types (changed ASC);
+GO  
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE tags_memories
+--
+-- Description : 
+-- tags memories refer to area of memomries requested to reach local, db,...
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS tags_memories;
+GO
+CREATE TABLE tags_memories (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- area memories informations
+  [name]	varchar(45) NOT NULL,			-- local, db,...
+  comment	varchar(255) DEFAULT NULL,		 
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_tags_memories_id PRIMARY KEY CLUSTERED (id asc),
+
+);
+
+GO
+CREATE TRIGGER tgr_tags_memories_changed ON tags_memories
+	AFTER UPDATE AS UPDATE tags_memories
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_tags_memories_id ON tags_memories (id ASC);
+CREATE INDEX i_tags_memories_type ON tags_memories ([name] ASC);
+CREATE INDEX i_tags_memories_created ON tags_memories (created ASC);
+CREATE INDEX i_tags_memories_changed ON tags_memories (changed ASC);
+GO  
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE tags
+--
+-- Description : 
+-- tags refer to one autoamtise data collect from a controller defined by 
+-- machines
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS tags;
+GO
+CREATE TABLE tags (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- informations
+  [table]	INT NULL,					-- tag table
+  [name]	VARCHAR(255) NOT NULL,		-- tag name
+
+
+  machine	INT NOT NULL,				-- tag connection to machine
+  [type]	INT NOT NULL,				-- tag type
+  memory	INT NOT NULL,				-- tag memory "Local" or "Data Bloc"
+
+  db		INT	NULL DEFAULT 0,		-- tag data bloc number ex DB50
+  byte		INT NULL DEFAULT 0,		-- tag data bloc byte	ex DBW20, DBD20, DBX20 - depending on type and memory
+  [bit]		INT NULL DEFAULT 0,		-- tag data bloc bit	ex .0 .1 .2 .3 .4 .5 .6 .7
+
+  -- Collecting data
+  active	bit NULL DEFAULT 0,				-- Idicate if activate for collecting
+  cycle		INT NULL DEFAULT 1,				-- tag acquisition cycle in second
+  vFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
+  vInt		INT NULL DEFAULT 0,				-- Indicate  an int value
+  vBool		bit	NULL DEFAULT 0,				-- Indicate an boolean value
+  vStr		varchar(255),					-- Indicate a varachar value
+  vDateTime	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
+  vStamp	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamping time of collecting data
+  
+  -- Persistence
+  persistence	bit NULL DEFAULT 0,			-- Indicate persistence activate or not / Note need to check cross persistence connection
+
+  [comment]	VARCHAR(512) DEFAULT NULL,	-- More comment
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_tags_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_tags_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_table FOREIGN KEY ([table]) REFERENCES tags_tables (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_machine FOREIGN KEY (machine) REFERENCES machines (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_type FOREIGN KEY ([type]) REFERENCES tags_types (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_memory FOREIGN KEY (memory) REFERENCES tags_memories (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_tags_changed ON tags
+	AFTER UPDATE AS UPDATE tags
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_tags_id ON tags (id ASC);
+CREATE INDEX i_tags_company ON tags ([company] ASC);
+CREATE INDEX i_tags_tables ON tags ([table] ASC);
+CREATE INDEX i_tags_name ON tags ([name] asc);
+CREATE INDEX i_tags_machine ON tags ([machine] asc);
+CREATE INDEX i_tags_type ON tags ([type] asc);
+CREATE INDEX i_tags_memory ON tags ([memory] asc);
+CREATE INDEX i_tags_db ON tags (db asc);
+CREATE INDEX i_tags_byte ON tags (byte asc);
+CREATE INDEX i_tags_created ON tags (created ASC);
+CREATE INDEX i_tags_changed ON tags (changed ASC);
+GO  
+
+
+
+
+
 

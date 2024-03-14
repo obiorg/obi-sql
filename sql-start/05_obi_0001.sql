@@ -263,7 +263,7 @@ CREATE UNIQUE INDEX ui_entities_id ON entities (id ASC);
 CREATE UNIQUE INDEX ui_entities_entity ON entities (entity ASC);
 
 CREATE INDEX i_entities_created ON entities (created ASC);
-CREATE INDEX i_entities_changed ON entities (created ASC);
+CREATE INDEX i_entities_changed ON entities (changed ASC);
 GO  
 
 
@@ -342,7 +342,7 @@ CREATE UNIQUE INDEX ui_businesses_id ON businesses (id ASC);
 CREATE UNIQUE INDEX ui_businesses_business ON businesses (entity ASC, business ASC);
 
 CREATE INDEX i_businesses_created ON businesses (created ASC);
-CREATE INDEX i_businesses_changed ON businesses (created ASC);
+CREATE INDEX i_businesses_changed ON businesses (changed ASC);
 GO  
 
 
@@ -484,7 +484,7 @@ GO
 CREATE UNIQUE INDEX ui_user_hashing_algorithms_id ON user_hashing_algorithms (id ASC);
 CREATE INDEX i_user_hashing_algorithms_name ON user_hashing_algorithms (algorithmName ASC);
 CREATE INDEX i_user_hashing_algorithms_created ON user_hashing_algorithms (created ASC);
-CREATE INDEX i_user_hashing_algorithms_changed ON user_hashing_algorithms (created ASC);
+CREATE INDEX i_user_hashing_algorithms_changed ON user_hashing_algorithms (changed ASC);
 GO  
 
 
@@ -758,6 +758,61 @@ CREATE INDEX i_user_account_changed ON user_account (created ASC);
 GO  
 
 
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE machines_types
+--
+-- Description : 
+-- user account refer to main account informations about user which are mandatory
+--
+-- Exemple(s) :
+-- see https://vertabelo.com/blog/user-authentication-module/ for mecanism
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS machines_types;
+GO
+CREATE TABLE machines_types (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Name
+  firstName		VARCHAR(45)		NOT NULL,
+  lastName		varchar(45)		NOT NULL,
+  middleName	varchar(45)		NULL,
+  initialLetter	varchar(45)		NULL,
+  
+  -- complements
+  [genre]					char(1)			NOT NULL,
+  [dateOfBirth]				date			NOT NULL,
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_machines_types_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys
+);
+
+GO
+CREATE TRIGGER tgr_machines_types_changed ON machines_types
+	AFTER UPDATE AS UPDATE machines_types
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_machines_types_id ON machines_types (id ASC);
+CREATE INDEX i_machines_types_firstName ON machines_types (firstName ASC);
+CREATE INDEX i_machines_types_lastName ON machines_types (lastName ASC);
+CREATE INDEX i_machines_types_genre ON machines_types (genre ASC);
+CREATE INDEX i_machines_types_dateOfBirth ON machines_types (dateOfBirth ASC);
+CREATE INDEX i_machines_types_created ON machines_types (created ASC);
+CREATE INDEX i_machines_types_changed ON machines_types (created ASC);
+GO  
 
 
 
