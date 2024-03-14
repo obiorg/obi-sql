@@ -1321,7 +1321,7 @@ CREATE TRIGGER tgr_tags_memories_changed ON tags_memories
 	WHERE id IN (SELECT DISTINCT id FROM Inserted)
 GO
 CREATE UNIQUE INDEX ui_tags_memories_id ON tags_memories (id ASC);
-CREATE INDEX i_tags_memories_type ON tags_memories ([name] ASC);
+CREATE INDEX i_tags_memories_name ON tags_memories ([name] ASC);
 CREATE INDEX i_tags_memories_created ON tags_memories (created ASC);
 CREATE INDEX i_tags_memories_changed ON tags_memories (changed ASC);
 GO  
@@ -1415,6 +1415,176 @@ GO
 
 
 
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE pers_method
+--
+-- Description : 
+-- peristence method refer to a technique to persist data over the system
+-- this is system table
+--
+-- Exemple(s) : a method can be saving data as define tags in value in time
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS pers_method;
+GO
+CREATE TABLE pers_method (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- area memories informations
+  [name]	varchar(45) NOT NULL,			-- local, db,...
+  comment	varchar(512) DEFAULT NULL,		 
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_pers_method_id PRIMARY KEY CLUSTERED (id asc),
+
+);
+
+GO
+CREATE TRIGGER tgr_pers_method_changed ON pers_method
+	AFTER UPDATE AS UPDATE pers_method
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_pers_method_id ON pers_method (id ASC);
+CREATE INDEX i_pers_method_name ON pers_method ([name] ASC);
+CREATE INDEX i_pers_method_created ON pers_method (created ASC);
+CREATE INDEX i_pers_method_changed ON pers_method (changed ASC);
+GO  
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE persistence
+--
+-- Description : 
+-- peristence refer to association in between tags and available persistence 
+-- technique used for this tags
+--
+-- Exemple(s) : 
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS persistence;
+GO
+CREATE TABLE persistence (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+
+  -- area memories informations
+  [tag]		INT NOT NULL,					-- refer to a tag element
+  [method]	INT NOT NULL,					-- refer to a method of persistence
+  activate	BIT NULL DEFAULT 0,				-- indicate if this persistence is activated
+  comment	varchar(512) DEFAULT NULL,		 
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_persistence_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_persistence_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_persistence_tag FOREIGN KEY ([tag]) REFERENCES tags (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_persistence_method FOREIGN KEY ([method]) REFERENCES pers_method (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_persistence_changed ON persistence
+	AFTER UPDATE AS UPDATE persistence
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_persistence_id ON persistence (id ASC);
+CREATE UNIQUE INDEX ui_persistence_company_tag_method ON persistence (company ASC, tag asc, method asc);
+CREATE INDEX i_persistence_tag ON persistence ([tag] ASC);
+CREATE INDEX i_persistence_method ON persistence ([method] ASC);
+CREATE INDEX i_persistence_created ON persistence (created ASC);
+CREATE INDEX i_persistence_changed ON persistence (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE pers_standard
+--
+-- Description : 
+-- peristence standard refer to standard saving data for in tags a new one 
+-- comming will be put bellow the preview tag. Can be fast loaded
+--
+-- Exemple(s) : 
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS pers_standard;
+GO
+CREATE TABLE pers_standard (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  
+  -- tag informations
+  [tag]		INT NOT NULL,					-- tag information
+
+  -- value informations
+  vFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
+  vInt		INT NULL DEFAULT 0,				-- Indicate  an int value
+  vBool		bit	NULL DEFAULT 0,				-- Indicate an boolean value
+  vStr		varchar(255),					-- Indicate a varachar value
+  vDateTime	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
+  vStamp	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamping time of collecting data
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_pers_standard_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_pers_standard_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_pers_standard_tag FOREIGN KEY ([tag]) REFERENCES tags (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_pers_standard_changed ON pers_standard
+	AFTER UPDATE AS UPDATE pers_standard
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_pers_standard_id ON pers_standard (id ASC);
+CREATE INDEX ui_pers_standard_company_tag ON pers_standard (company ASC, tag asc);
+CREATE INDEX i_pers_standard_tag ON pers_standard ([tag] ASC);
+CREATE INDEX i_pers_standard_vFloat ON pers_standard (vFloat ASC);
+CREATE INDEX i_pers_standard_vInt ON pers_standard (vInt ASC);
+CREATE INDEX i_pers_standard_vBool ON pers_standard (vBool ASC);
+CREATE INDEX i_pers_standard_vStr ON pers_standard (vStr ASC);
+CREATE INDEX i_pers_standard_vDateTime ON pers_standard (vDateTime ASC);
+CREATE INDEX i_pers_standard_vStamp ON pers_standard (vStamp ASC);
+CREATE INDEX i_pers_standard_created ON pers_standard (created ASC);
+CREATE INDEX i_pers_standard_changed ON pers_standard (changed ASC);
+GO  
 
 
 
