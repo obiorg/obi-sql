@@ -1111,6 +1111,7 @@ GO
 -- machines refer to a description access to machine. Do note mix machine and
 -- equipement which are totally to different concept. 
 -- Machine olding information regarding contrôler (CPU)
+-- For MQTT please see https://www.hivemq.com/blog/implementing-mqtt-in-java/
 --
 -- Exemple(s) :
 -- 
@@ -1128,7 +1129,7 @@ CREATE TABLE machines (
   [company] INT NOT NULL,
 
   -- Ethernet informations
-  [address]	VARCHAR(15)	NOT NULL,
+  [address]	VARCHAR(512)	NOT NULL,	-- can be ip address or url in case of mqtt or webook system defined by 
   [mask]	VARCHAR(15) DEFAULT NULL,	-- NOT USE
   [dns]		VARCHAR(45)	DEFAULT NULL,	-- NOT USE
 
@@ -1141,6 +1142,15 @@ CREATE TABLE machines (
   rack		INT DEFAULT 1,	
   slot		INT Default 2,
   [driver]	INT NOT NULL,
+
+  -- MQTT related options informations
+  mqqt		bit DEFAULT 0,						-- mqtt indicate machine is mqtt
+  mqqt_user	VARCHAR(45)	DEFAULT NULL,			-- mqtt option username
+  mqqt_password	VARCHAR(512)	DEFAULT NULL,	-- mqtt option password as code   
+
+  -- Webhook 
+  webhook			bit DEFAULT 0,				-- Indicate URL is a webhook
+  webhook_secret	varchar(512)	DEFAULT NULL,	-- webhook endpointSecret  https://groups.google.com/a/lists.stripe.com/g/api-discuss/c/dSUfiwjEMsI / https://dev.to/jackynote/a-step-by-step-guide-to-implement-webhook-workflows-in-flight-booking-systems-1lpm / https://slack.dev/java-slack-sdk/guides/incoming-webhooks
 
   -- Other informations
   [bus]		INT DEFAULT 0,				-- 
@@ -1168,6 +1178,247 @@ CREATE INDEX i_machines_company_address ON machines (company asc, [address] ASC)
 CREATE INDEX i_machines_created ON machines (created ASC);
 CREATE INDEX i_machines_changed ON machines (changed ASC);
 GO  
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE alarm_groups
+--
+-- Description : 
+-- alarm group refer to a grouping of alarm of same kind or element
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS alarm_groups;
+GO
+CREATE TABLE alarm_groups (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- Ethernet informations
+  [group]		varchar(45)		NOT NULL,			-- 
+  comment		VARCHAR(512)	DEFAULT NULL,		-- detail comment
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_alarm_groups_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_alarm_groups_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_alarm_groups_changed ON alarm_groups
+	AFTER UPDATE AS UPDATE alarm_groups
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_alarm_groups_id ON alarm_groups (id ASC);
+CREATE UNIQUE INDEX ui_alarm_groups_company_group ON alarm_groups (company asc, [group] asc);
+CREATE INDEX i_alarm_groups_company ON alarm_groups ([company] ASC);
+CREATE INDEX i_alarm_groups_group ON alarm_groups ([group] ASC);
+CREATE INDEX i_alarm_groups_created ON alarm_groups (created ASC);
+CREATE INDEX i_alarm_groups_changed ON alarm_groups (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE alarm_render
+--
+-- Description : 
+-- alarm render refer to a style of rendering alarm
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS alarm_render;
+GO
+CREATE TABLE alarm_render (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- Ethernet informations
+  [render]		varchar(45)		NOT NULL,					--  short code
+  [name]		varchar(255)	DEFAULT NULL,				-- specify name
+  [color]		varchar(45)		DEFAULT '255;255;0',		-- text color yellow
+  [background]	varchar(45)		DEFAULT '255;0;0',			-- background color red
+  [blink]		bit				DEFAULT 0,					-- enable blinking
+  [colorBlink]	varchar(45)		DEFAULT '255;0;0',			-- text color yellow
+  [backgroundBlink]	varchar(45)		DEFAULT '255;255;0',	-- text color yellow
+  comment		VARCHAR(512)	DEFAULT NULL,		-- detail comment
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_alarm_render_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_alarm_render_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_alarm_render_changed ON alarm_render
+	AFTER UPDATE AS UPDATE alarm_render
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_alarm_render_id ON alarm_render (id ASC);
+CREATE UNIQUE INDEX ui_alarm_render_company_group ON alarm_render (company asc, [render] asc);
+CREATE INDEX i_alarm_render_company ON alarm_render ([company] ASC);
+CREATE INDEX i_alarm_render_render ON alarm_render ([render] ASC);
+CREATE INDEX i_alarm_render_created ON alarm_render (created ASC);
+CREATE INDEX i_alarm_render_changed ON alarm_render (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE alarm_classes
+--
+-- Description : 
+-- alarm classes refer to a class of alarm like warning, errors, system,...
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS alarm_classes;
+GO
+CREATE TABLE alarm_classes (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company] INT NOT NULL,
+
+  -- Ethernet informations
+  [class]		varchar(45)		NOT NULL,			-- 
+  [name]		varchar(255)	DEFAULT NULL,		-- 
+  [render]		INT DEFAULT NULL,					-- rendering style
+  comment		VARCHAR(512)	DEFAULT NULL,		-- detail comment
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_alarm_classes_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_alarm_classes_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_alarm_classes_alarm_render FOREIGN KEY (render) REFERENCES alarm_render (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_alarm_classes_changed ON alarm_classes
+	AFTER UPDATE AS UPDATE alarm_classes
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_alarm_classes_id ON alarm_classes (id ASC);
+CREATE UNIQUE INDEX ui_alarm_classes_company_class ON alarm_classes (company asc, [class] asc);
+CREATE INDEX i_alarm_classes_company ON alarm_classes ([company] ASC);
+CREATE INDEX i_alarm_classes_class ON alarm_classes ([class] ASC);
+CREATE INDEX i_alarm_classes_created ON alarm_classes (created ASC);
+CREATE INDEX i_alarm_classes_changed ON alarm_classes (changed ASC);
+GO  
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE alarms
+--
+-- Description : 
+-- alarms refer to a alam definition corresponding to a symbol and default expression
+-- a path file csv where to find language to use. 
+--
+-- Exemple(s) :
+-- 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS alarms;
+GO
+CREATE TABLE alarms (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [company]		INT NOT NULL,
+
+  -- Ethernet informations
+  [alarm]		varchar(45)		NOT NULL,			-- symbolic name
+  [name]		varchar(255)	DEFAULT NULL,		-- Name of alarme (definition)
+  [descirption]	varchar(512)	DEFAULT NULL,		-- default text description (text alarm)
+  [group]		INT DEFAULT NULL,					-- associated group
+  [class]		INT DEFAULT NULL,					-- class of alarm (error, warning, information,...)
+  [language]	INT DEFAULT NULL,					-- specify default language number
+  comment		VARCHAR(512)	DEFAULT NULL,		-- detail comment
+
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_alarms_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_alarms_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_alarms_alarm_group FOREIGN KEY ([group]) REFERENCES alarm_groups (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_alarms_alarm_class FOREIGN KEY (class) REFERENCES alarm_classes (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_alarms_changed ON alarms
+	AFTER UPDATE AS UPDATE alarms
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_alarms_id ON alarms (id ASC);
+CREATE UNIQUE INDEX ui_alarms_company_alarm ON alarms (company asc, [alarm] asc);
+CREATE INDEX i_alarms_company ON alarms ([company] ASC);
+CREATE INDEX i_alarms_alarm ON alarms ([alarm] ASC, [group] asc, class asc);
+CREATE INDEX i_alarms_created ON alarms (created ASC);
+CREATE INDEX i_alarms_changed ON alarms (changed ASC);
+GO  
+
+
 
 
 
@@ -1332,6 +1583,8 @@ GO
 
 
 
+
+
 -------------------------------------------------------------------------------
 --
 -- CREATE TABLE tags
@@ -1371,15 +1624,69 @@ CREATE TABLE tags (
   -- Collecting data
   active	bit NULL DEFAULT 0,				-- Idicate if activate for collecting
   cycle		INT NULL DEFAULT 1,				-- tag acquisition cycle in second
+  delta		bit NULL DEFAULT 0,				-- value will be collecting only if delta is applied
+
+  -- Value of delta when set
+  deltaFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value as absolute for a delta variation in case of delta activation 
+  deltaInt		INT NULL DEFAULT 0,				-- indicate integer value as absolute for a delta variation in case of delta activation 
+  deltaBool	INT NULL DEFAULT 0,					-- detecting delta (0>on reverse, 1>on up 0 to 1, 2>on down 1 to 0 NB : any is not take in account - you need to disbale delta)
+  deltaDateTime	bigint NULL DEFAULT 0,			-- delta second in order to accept collectigng
+ 
+  -- Valeur collectées
   vFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
   vInt		INT NULL DEFAULT 0,				-- Indicate  an int value
   vBool		bit	NULL DEFAULT 0,				-- Indicate an boolean value
   vStr		varchar(255),					-- Indicate a varachar value
   vDateTime	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
   vStamp	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamping time of collecting data
-  
+
+  -- Default behavior
+  vDefault			bit NULL DEFAULT 0,				-- Enable if activae default value use
+  vFloatDefault		FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
+  vIntDefault		INT NULL DEFAULT 0,				-- Indicate  an int value
+  vBoolDefault		bit	NULL DEFAULT 0,				-- Indicate an boolean value
+  vStrDefault		varchar(255),					-- Indicate a varachar value
+  vDateTimeDefault	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
+  vStampDefault 	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamping time of collecting data
+	
+  -- Indicate a counter data
+  [counter]			bit DEFAULT 0,					-- indicate a counter data
+  [counterType]		INT DEFAULT 0,					-- 0 > Incrémental + Décremental + Reset, 1 > Incrémental + Reset, 2 > Decremental + Reset, 3 > Incrémental + Décremental, 4 > Incrémental, 5 > Decremental
+
+  -- Instrument 
+  [mesure]			bit DEFAULT 0,					-- Indicate a mesure data
+  [mesureMin]		FLOAT(53) NULL DEFAULT 0.0,		-- specify mesure range min
+  [mesureMax]		FLOAT(53) NULL DEFAULT 1.0,		-- specify mesure range min
+
+  -- MQTT related options informations
+  mqqt_topic		VARCHAR(512)	DEFAULT NULL,	-- mqtt topic specify which topics will give this informations and unsure client is created to receive this informations
+
+  -- webhook
+  webhook			VARCHAR(512)	DEFAULT NULL,	-- webhook data to access referenced by string separated by ":" 
+
+  -- formula 
+  [formula]			bit DEFAULT 0,					-- Indicate a formula tag
+  [formCalculus]	VARCHAR(4096)	DEFAULT NULL,	-- indicate formula description
+  [forProcessing]	INT DEFAULT NULL,				-- identicate when processing 0 > any change value, 1 > all value change, 
+
+  -- Error State
+  error				bit NULL DEFAULT 0,			-- Indique an error exist on the collection
+  errorMsg			varchar(512) DEFAULT NULL,	-- Indique a message regarding error detected
+  errorStamp		datetime NULL DEFAULT CURRENT_TIMESTAMP, --  -- Indicate when error was last specifying
+
+    
+  -- Alarm
+  alarmEnable		bit NULL DEFAULT 0,				-- Indicate this tag is an alarm
+  alarm 			INT NULL DEFAULT 0,				-- Indicate alarm number or reference
+
   -- Persistence
-  persistence	bit NULL DEFAULT 0,			-- Indicate persistence activate or not / Note need to check cross persistence connection
+  persistence		bit NULL DEFAULT 0,			-- Indicate persistence activate or not / Note need to check cross persistence connection
+  persOffsetEnable	bit NULL DEFAULT 0,			-- Indicate if offset need to be take while persistence apply
+  persOffsetFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
+  persOffsetInt		INT NULL DEFAULT 0,				-- Indicate  an int value
+  persOffsetBool	bit	NULL DEFAULT 0,				-- Indicate an boolean value
+  persOffsetDateTime	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
+  
 
   [comment]	VARCHAR(512) DEFAULT NULL,	-- More comment
 
@@ -1392,6 +1699,7 @@ CREATE TABLE tags (
   CONSTRAINT fk_tags_machine FOREIGN KEY (machine) REFERENCES machines (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_tags_type FOREIGN KEY ([type]) REFERENCES tags_types (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_tags_memory FOREIGN KEY (memory) REFERENCES tags_memories (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_alarms FOREIGN KEY (alarm) REFERENCES alarms (id) ON UPDATE NO ACTION,
 );
 
 GO
@@ -1440,7 +1748,7 @@ CREATE TABLE pers_method (
   changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
 
   -- area memories informations
-  [name]	varchar(45) NOT NULL,			-- local, db,...
+  [name]	varchar(45) NOT NULL,			
   comment	varchar(512) DEFAULT NULL,		 
   
   -- MANAGING KEYS
@@ -1550,7 +1858,7 @@ CREATE TABLE pers_standard (
   
   -- tag informations
   [tag]		INT NOT NULL,					-- tag information
-
+   
   -- value informations
   vFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
   vInt		INT NULL DEFAULT 0,				-- Indicate  an int value
@@ -1558,6 +1866,18 @@ CREATE TABLE pers_standard (
   vStr		varchar(255),					-- Indicate a varachar value
   vDateTime	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Indicate a value collecting as datetime
   vStamp	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamping time of collecting data
+
+  -- managing state
+  stampStart	datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamp beginning of state On
+  stampEnd		datetime NULL DEFAULT CURRENT_TIMESTAMP, -- Stamp beginning of state Off
+  tbf			FLOAT(22) NULL DEFAULT 0.0,				 -- indicate defference between prcededing s
+  ttr			FLOAT(22) NULL DEFAULT 0.0,
+
+  -- Error State
+  error				bit NULL DEFAULT 0,			-- Indique an error exist on the collection
+  errorMsg			varchar(512) DEFAULT NULL,	-- Indique a message regarding error detected
+
+  -- Compute related to stamp
   
   -- MANAGING KEYS
   CONSTRAINT pk_pers_standard_id PRIMARY KEY CLUSTERED (id asc),
