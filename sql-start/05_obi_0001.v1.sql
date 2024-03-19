@@ -1427,6 +1427,78 @@ GO
 
 
 
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE meas_units
+--
+-- Description : 
+-- measurement unit refer to a units of element  describe by size, code,...
+--
+-- Exemple(s) :
+-- https://uel.unisciel.fr/physique/outils_nancy/outils_nancy_ch02/co/apprendre_03.html
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS meas_units;
+GO
+CREATE TABLE meas_units (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  [entity]			varchar(45)		NOT NULL,			-- 
+
+  -- size
+  [sizeName]		varchar(255)	NOT NULL,			-- 
+  [sizeSymbol]		varchar(45)		NOT NULL,			-- 
+  -- Units
+  [unitName]		varchar(255)	NOT NULL,			-- 
+  [unitSymbol]		varchar(45)		NOT NULL,			-- 
+  -- Dimension
+  [dimension]		varchar(45)		DEFAULT NULL,		-- 
+
+  -- group
+  [group]			varchar(45)		DEFAULT NULL,		-- regroup unit by kind base
+  [tagging]			varchar(512)	DEFAULT NULL,		-- Allow tag for regrouping by metier
+
+  comment			VARCHAR(512)	DEFAULT NULL,		-- detail comment
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_meas_units_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_meas_units_entity FOREIGN KEY (entity) REFERENCES entities (entity) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_meas_units_changed ON meas_units
+	AFTER UPDATE AS UPDATE meas_units
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_meas_units_id ON meas_units (id ASC);
+CREATE INDEX i_meas_units_entity ON meas_units ([entity] ASC);
+CREATE INDEX i_meas_units_group ON meas_units ([group] ASC);
+CREATE INDEX i_meas_units_created ON meas_units (created ASC);
+CREATE INDEX i_meas_units_changed ON meas_units (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 -------------------------------------------------------------------------------
 --
 -- CREATE TABLE tags_tables
@@ -1658,16 +1730,22 @@ CREATE TABLE tags (
   [mesureMin]		FLOAT(53) NULL DEFAULT 0.0,		-- specify mesure range min
   [mesureMax]		FLOAT(53) NULL DEFAULT 1.0,		-- specify mesure range min
 
+  -- Value unit
+  [measureUnit]		INT DEFAULT NULL,				-- Indicate tag unit
+
   -- MQTT related options informations
   mqqt_topic		VARCHAR(512)	DEFAULT NULL,	-- mqtt topic specify which topics will give this informations and unsure client is created to receive this informations
 
   -- webhook
   webhook			VARCHAR(512)	DEFAULT NULL,	-- webhook data to access referenced by string separated by ":" 
 
+  -- Indicate laboratoring 
+  [laboratory]		bit DEFAULT 0,					-- Indicate a laboratory tag
+
   -- formula 
   [formula]			bit DEFAULT 0,					-- Indicate a formula tag
   [formCalculus]	VARCHAR(4096)	DEFAULT NULL,	-- indicate formula description
-  [forProcessing]	INT DEFAULT NULL,				-- identicate when processing 0 > any change value, 1 > all value change, 
+  [formProcessing]	INT DEFAULT NULL,				-- identicate when processing 0 > any change value, 1 > all value change, 
 
   -- Error State
   error				bit NULL DEFAULT 0,			-- Indique an error exist on the collection
@@ -1700,6 +1778,7 @@ CREATE TABLE tags (
   CONSTRAINT fk_tags_type FOREIGN KEY ([type]) REFERENCES tags_types (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_tags_memory FOREIGN KEY (memory) REFERENCES tags_memories (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_tags_alarms FOREIGN KEY (alarm) REFERENCES alarms (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_tags_meas_units FOREIGN KEY ([measureUnit]) REFERENCES meas_units (id) ON UPDATE NO ACTION,
 );
 
 GO
@@ -1908,3 +1987,312 @@ GO
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE analyse_categories
+--
+-- Description : 
+-- analyse categories define category of analyse
+--
+-- Exemple(s) : 
+-- physical category of analyse or chimical, or yeast category,...
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS analyse_categories;
+GO
+CREATE TABLE analyse_categories (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  business		INT DEFAULT NULL,			-- Allow etheir business or company definition
+  company		INT DEFAULT NULL,			-- Allow etheir company or business definition
+  
+  [category]		varchar(45) NOT NULL,
+  [designation]		varchar(255) DEFAULT NULL,
+  [description]		text DEFAULT NULL,
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_analyse_categories_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_analyse_categories_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_categories_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+
+);
+
+GO
+CREATE TRIGGER tgr_analyse_categories_changed ON analyse_categories
+	AFTER UPDATE AS UPDATE analyse_categories
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_analyse_categories_id ON analyse_categories (id ASC);
+CREATE INDEX ui_analyse_categories_business_category ON analyse_categories (business ASC, [category] asc);
+CREATE INDEX ui_analyse_categories_company_category ON analyse_categories (company ASC, [category] asc);
+CREATE INDEX i_analyse_categories_category ON analyse_categories ([category] ASC);
+CREATE INDEX i_analyse_categories_designation ON analyse_categories ([designation] ASC);
+CREATE INDEX i_analyse_categories_created ON analyse_categories (created ASC);
+CREATE INDEX i_analyse_categories_changed ON analyse_categories (changed ASC);
+GO  
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE analyse_methods
+--
+-- Description : 
+-- analyse method define technique to use for analyse
+--
+-- Exemple(s) : 
+-- am_method	am_designation	am_description
+-- E.B.C 		European Brewery convention	
+-- UNDEF		INDEFINI	-
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS analyse_methods;
+GO
+CREATE TABLE analyse_methods (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  business		INT DEFAULT NULL,			-- Allow etheir business or company definition
+  company		INT DEFAULT NULL,			-- Allow etheir company or business definition
+  
+  [method]		varchar(45) NOT NULL,
+  [designation] varchar(255) DEFAULT NULL,
+  [description] text DEFAULT NULL,
+  [filepath]	varchar(4096) DEFAULT NULL,	-- Path to file if havailable
+  
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_analyse_methods_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_analyse_methods_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_methods_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+
+);
+
+GO
+CREATE TRIGGER tgr_analyse_methods_changed ON analyse_methods
+	AFTER UPDATE AS UPDATE analyse_methods
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_analyse_methods_id ON analyse_methods (id ASC);
+CREATE INDEX ui_analyse_methods_business_method ON analyse_methods (business ASC, [method] asc);
+CREATE INDEX ui_analyse_methods_company_method ON analyse_methods (company ASC, [method] asc);
+CREATE INDEX i_analyse_methods_method ON analyse_methods ([method] ASC);
+CREATE INDEX i_analyse_methods_designation ON analyse_methods ([designation] ASC);
+CREATE INDEX i_analyse_methods_created ON analyse_methods (created ASC);
+CREATE INDEX i_analyse_methods_changed ON analyse_methods (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE analyse_types
+--
+-- Description : 
+-- analyse type refer to a type of analyse that can be made by a laboratory
+--
+-- Exemple(s) : 
+-- at_type	at_designation	at_unite	at_method	at_category	at_description
+--- µS	MES. DE CONDUCTIVITE	µS/cm	UNDEF	UNDEF	Elle détermine l ensemble des els minéraux dissous dans une solution. Une eau douce a une valeur faible.
+--- Cl-	MES. ION CHLORURE	ppm	UNDEF	UNDEF	-
+--- Cl2	MES. DU DICHLORE (CHLORINE)	mg/l	UNDEF	UNDEF	Le dichlore est un gaz jaune-vert dans les conditions normales de température et de pression.
+--- COL_t24h	COLIFORMES TOTAL 24H	UFC/ml	UNDEF	UNDEF	-
+--- d	MES. DENSITE	UNIT	UNDEF	UNDEF	Mesure de la densité par rapport à celle de l eau
+--- EBC	MES. TURBIDITE	EBC	UNDEF	UNDEF	-
+--- Fer_t	MES. TENEUR EN FER TOTAL	mg/l	UNDEF	UNDEF	-
+--- FLO_t48h	FLORE TOTAL 48H	UFC/ml	UNDEF	UNDEF	-
+--- LEV_moi48h	LEVURES MOISIS. (48H)	UFC/100ml	UNDEF	UNDEF	-
+--- NTU	MES. TURBIDITE EN NTU	NTU	UNDEF	UNDEF	RAS
+--- P	MES. PHOSPHATE	mg/l	UNDEF	UNDEF	La mesure de phosphate mesure le développement des algues
+--- PH	MES. DE PH	pH	UNDEF	UNDEF	Le PH mesure l acidité d une eau
+--- PSE_ML	PSEUDOMONAS	UFC/100ml	UNDEF	UNDEF	Mesure des pseudomonas
+--- SiO2	MES. DU DIOXYDE DE SILICIUM	mg/l	UNDEF	UNDEF	-
+--- SiO2/TAC	MES. RAPPORT SILICE PAR TAC	UNIT	UNDEF	UNDEF	La silice étant d autant plus soluble que le pH et le TAC sont élevés, ce rapport permet de maintenir la silice essentiellement sous forme dissoute (limite la silice colloïdale)
+--- SiO2cir/SiO2ap	MES. RAPPORT SILICE CIR/SILICE AP	UNIT	UNDEF	UNDEF	-
+--- SO32-	MES. SULFITES	mg/l	UNDEF	UNDEF	-
+--- STD*	MES. SOLIDES TOTAUX ISSOUS	ppm	UNDEF	UNDEF	-
+--- T_CO3-2	TAUX DE CARBONATE [CO3-2]	%	UNDEF	UNDEF	Mesure du taux de carbonate en pourcent.
+--- T_NaOH	TAUX DE SOUDE CAUSTIQUE [NaOH]	%	UNDEF	UNDEF	MESURE DU TAUX DE SOUDE CAUSTIQUE
+--- TA	MES. TITRE ALCALIMETRIQUE	ppm	UNDEF	UNDEF	Le TA dose la totalité des hydroxydes et la moitié des carbonates qui sont alors entièrement ransformés en bicarbonates à un pH de 8,3. Par conséquent, il mesure la teneur en alcalis libre (OH-) et en carbonates (CO3)
+--- TAC	MES. TITRE ALACALIMETRIQUE COMPLET	mg/l	UNDEF	UNDEF	Le TAC correspond à la totalité des bicarbonates et des carbonates. Par conséquent, il mesure la somme des alcalis libres, des carbonates et des bicarbonates
+--- TH	MES. TITRE HYDROMETRIQUE 	°F	UNDEF	UNDEF	Le TH mesure la quantité de minéraux dissous (des sels de calcaire et de magnésium)
+--- TS_mmN_M	FORCE DE TENSION SUPERFICIELLE [mmN/M]	AMP	UNDEF	UNDEF	Mesure de la force de tension superficielle
+--- UNDEF	INDEFINI	UNIT	UNDEF	UNDEF	-
+--- VMIX	VOLUME DE MIX (100) [L]	LTR	UNDEF	UNDEF	Quantification d'un volume de mixe 100 en litre
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS analyse_types;
+GO
+CREATE TABLE analyse_types (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  business		INT DEFAULT NULL,			-- Allow etheir business or company definition
+  company		INT DEFAULT NULL,			-- Allow etheir company or business definition
+  
+  [type]		varchar(45) NOT NULL,
+  [designation] varchar(255) DEFAULT NULL,
+  [unit]		INT NOT NULL,
+  [method]		INT NOT NULL,
+  [category]	INT NOT NULL,
+  [description] text DEFAULT NULL,
+  
+  -- MANAGING KEYS
+  CONSTRAINT pk_analyse_types_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_analyse_types_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_types_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_types_unit FOREIGN KEY ([unit]) REFERENCES meas_units (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_types_method FOREIGN KEY ([method]) REFERENCES analyse_methods (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_types_category FOREIGN KEY ([category]) REFERENCES analyse_categories (id) ON UPDATE NO ACTION,
+
+);
+
+GO
+CREATE TRIGGER tgr_analyse_types_changed ON analyse_types
+	AFTER UPDATE AS UPDATE analyse_types
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_analyse_types_id ON analyse_types (id ASC);
+CREATE INDEX ui_analyse_types_business_type ON analyse_types (business ASC, [type] asc);
+CREATE INDEX i_analyse_types_type ON analyse_types ([type] ASC);
+CREATE INDEX i_analyse_types_designation ON analyse_types ([designation] ASC);
+CREATE INDEX i_analyse_types_unit ON analyse_types ([unit] ASC);
+CREATE INDEX i_analyse_types_method ON analyse_types ([method] ASC);
+CREATE INDEX i_analyse_types_category ON analyse_types ([category] ASC);
+CREATE INDEX i_analyse_types_created ON analyse_types (created ASC);
+CREATE INDEX i_analyse_types_changed ON analyse_types (changed ASC);
+GO  
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE analyse_points
+--
+-- Description : 
+-- analyse point refer to a specify place where sample or measure can be done
+--
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS analyse_points;
+GO
+CREATE TABLE analyse_points (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,
+  
+  [point]		varchar(45) NOT NULL,
+  [designation] varchar(255) DEFAULT NULL,
+  [available]	bit DEFAULT 1,						-- Indicate point is still available
+  [picture]		varchar(4096) DEFAULT NULL,
+  [equipement]	INT DEFAULT NULL,					-- Indicate equipement where point is closer or attached to
+  [description] text DEFAULT NULL,
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_analyse_points_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_analyse_points_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+--  CONSTRAINT fk_analyse_points_equipement FOREIGN KEY ([equipement]) REFERENCES equipements (id) ON UPDATE NO ACTION,
+
+);
+
+GO
+CREATE TRIGGER tgr_analyse_points_changed ON analyse_points
+	AFTER UPDATE AS UPDATE analyse_points
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_analyse_points_id ON analyse_points (id ASC);
+CREATE INDEX ui_analyse_points_company_point ON analyse_points (company ASC, [point] asc);
+CREATE INDEX i_analyse_points_point ON analyse_points ([point] ASC);
+CREATE INDEX i_analyse_points_designation ON analyse_points ([designation] ASC);
+CREATE INDEX i_analyse_points_equipement ON analyse_points ([equipement] ASC);
+CREATE INDEX i_analyse_points_created ON analyse_points (created ASC);
+CREATE INDEX i_analyse_points_changed ON analyse_points (changed ASC);
+GO  
+
+	
+	
+-- Analyse allowed doit être associé à un tag pour être persistant obligatoirement
+
+--- meas_limits	: permets définir les différentes limites pouvant exister	
+---		sorts (tag / analyse / )	reférence of tag or analyse_allowed as INT		limit value		limit order sequence (force limit to apply) define limit direction or target
+
+--- pers_std_limit : conserve les limites lorsque qu'un tag ou une prise de mesure allowed est saisie
