@@ -64,3 +64,7 @@ INSERT INTO [dbo].[pers_method]([deleted] ,[name] ,[comment])
      VALUES (0 , 'standard', 'this method save data in persistence standard all new data in a new row')
 GO
 
+
+
+
+meas_comparators

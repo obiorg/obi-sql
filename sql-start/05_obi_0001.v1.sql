@@ -856,7 +856,7 @@ CREATE TABLE user_roles (
 
   -- Foreign keys
   CONSTRAINT fk_user_roles_entity FOREIGN KEY (entity) REFERENCES entities (entity) ON UPDATE NO ACTION,
-  CONSTRAINT fk_user_roles_buisiness FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_user_roles_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_user_roles_company FOREIGN KEY (comapny) REFERENCES companies (id) ON UPDATE NO ACTION,
 
 
@@ -916,7 +916,7 @@ CREATE TABLE user_role_permissions (
 
   -- Foreign keys  -- Foreign keys
   CONSTRAINT fk_user_role_permissions_entity FOREIGN KEY (entity) REFERENCES entities (entity) ON UPDATE NO ACTION,
-  CONSTRAINT fk_user_role_permissions_buisiness FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_user_role_permissions_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_user_role_permissions_company FOREIGN KEY (comapny) REFERENCES companies (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_user_role_permissions_permission FOREIGN KEY (permission) REFERENCES user_permissions (id) ON UPDATE NO ACTION,
   CONSTRAINT fk_user_role_permissions_role FOREIGN KEY ([role]) REFERENCES user_roles (id) ON UPDATE NO ACTION,
@@ -1499,6 +1499,120 @@ GO
 
 
 
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE meas_comparators
+--
+-- Description : 
+-- measure comparators refer to system comparator in order to dectect and analyse
+-- calculus 
+--
+-- Exemple(s) : >, >=, <, <=, !=, <>
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS meas_comparators;
+GO
+CREATE TABLE meas_comparators (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  [symbol]			varchar(45)		NOT NULL,
+  [name]			varchar(255)	DEFAULT NULL,		
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_meas_comparators_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  
+);
+
+GO
+CREATE TRIGGER tgr_meas_comparators_changed ON meas_comparators
+	AFTER UPDATE AS UPDATE meas_comparators
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_meas_comparators_id ON meas_comparators (id ASC);
+CREATE INDEX i_meas_comparators_symbol ON meas_comparators ([symbol] ASC);
+CREATE INDEX i_meas_comparators_created ON meas_comparators (created ASC);
+CREATE INDEX i_meas_comparators_changed ON meas_comparators (changed ASC);
+GO 
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE meas_limits_groups
+--
+-- Description : 
+-- measure limits classes refer to different class of limits allowing to identify
+-- easyli system limits. Exemple excellence limits, low hight limits, low low and hight hight limit, user limits,...
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS meas_limits_groups;
+GO
+CREATE TABLE meas_limits_groups (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  business		INT DEFAULT NULL,					-- limit is specify for all buisness
+  company		INT DEFAULT NULL,					-- limit is apply for company only
+  
+  -- 
+  [group]			VARCHAR(45) NOT NULL,			-- groupe name
+  [designation]		VARCHAR(255) DEFAULT NULL,		-- fromal name
+  [description]		text DEFAULT NULL,
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_meas_limits_groups_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_meas_limits_groups_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_meas_limits_groups_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+   
+);
+
+GO
+CREATE TRIGGER tgr_meas_limits_groups_changed ON meas_limits_groups
+	AFTER UPDATE AS UPDATE meas_limits_groups
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_meas_limits_groups_id ON meas_limits_groups (id ASC);
+CREATE INDEX ui_meas_limits_groups_business_company ON meas_limits_groups (business ASC, company ASC, [group] asc);
+CREATE INDEX i_meas_limits_groups_group ON meas_limits_groups ([group] ASC);
+CREATE INDEX i_meas_limits_groups_designation ON meas_limits_groups ([designation] ASC);
+CREATE INDEX i_meas_limits_groups_created ON meas_limits_groups (created ASC);
+CREATE INDEX i_meas_limits_groups_changed ON meas_limits_groups (changed ASC);
+GO 
+
+
+
+
+
+
+
+
+
+
+
+
 -------------------------------------------------------------------------------
 --
 -- CREATE TABLE tags_tables
@@ -1845,7 +1959,8 @@ CREATE UNIQUE INDEX ui_pers_method_id ON pers_method (id ASC);
 CREATE INDEX i_pers_method_name ON pers_method ([name] ASC);
 CREATE INDEX i_pers_method_created ON pers_method (created ASC);
 CREATE INDEX i_pers_method_changed ON pers_method (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table pers_method created !',10,1) WITH NOWAIT   
 
 
 
@@ -1900,7 +2015,8 @@ CREATE INDEX i_persistence_tag ON persistence ([tag] ASC);
 CREATE INDEX i_persistence_method ON persistence ([method] ASC);
 CREATE INDEX i_persistence_created ON persistence (created ASC);
 CREATE INDEX i_persistence_changed ON persistence (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table persistence created !',10,1) WITH NOWAIT   
 
 
 
@@ -1983,7 +2099,8 @@ CREATE INDEX i_pers_standard_vDateTime ON pers_standard (vDateTime ASC);
 CREATE INDEX i_pers_standard_vStamp ON pers_standard (vStamp ASC);
 CREATE INDEX i_pers_standard_created ON pers_standard (created ASC);
 CREATE INDEX i_pers_standard_changed ON pers_standard (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table pers_standard created !',10,1) WITH NOWAIT  
 
 
 
@@ -2061,7 +2178,8 @@ CREATE INDEX i_analyse_categories_category ON analyse_categories ([category] ASC
 CREATE INDEX i_analyse_categories_designation ON analyse_categories ([designation] ASC);
 CREATE INDEX i_analyse_categories_created ON analyse_categories (created ASC);
 CREATE INDEX i_analyse_categories_changed ON analyse_categories (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table analyse_categories created !',10,1) WITH NOWAIT 
 
 
 	
@@ -2132,7 +2250,8 @@ CREATE INDEX i_analyse_methods_method ON analyse_methods ([method] ASC);
 CREATE INDEX i_analyse_methods_designation ON analyse_methods ([designation] ASC);
 CREATE INDEX i_analyse_methods_created ON analyse_methods (created ASC);
 CREATE INDEX i_analyse_methods_changed ON analyse_methods (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table analyse_methods created !',10,1) WITH NOWAIT 
 
 
 
@@ -2225,7 +2344,8 @@ CREATE INDEX i_analyse_types_method ON analyse_types ([method] ASC);
 CREATE INDEX i_analyse_types_category ON analyse_types ([category] ASC);
 CREATE INDEX i_analyse_types_created ON analyse_types (created ASC);
 CREATE INDEX i_analyse_types_changed ON analyse_types (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table analyse_types created !',10,1) WITH NOWAIT 
 
 
 
@@ -2286,13 +2406,280 @@ CREATE INDEX i_analyse_points_designation ON analyse_points ([designation] ASC);
 CREATE INDEX i_analyse_points_equipement ON analyse_points ([equipement] ASC);
 CREATE INDEX i_analyse_points_created ON analyse_points (created ASC);
 CREATE INDEX i_analyse_points_changed ON analyse_points (changed ASC);
-GO  
+GO
+RAISERROR (N'==> Table analyse_points created !',10,1) WITH NOWAIT
 
 	
-	
--- Analyse allowed doit être associé à un tag pour être persistant obligatoirement
 
---- meas_limits	: permets définir les différentes limites pouvant exister	
----		sorts (tag / analyse / )	reférence of tag or analyse_allowed as INT		limit value		limit order sequence (force limit to apply) define limit direction or target
 
---- pers_std_limit : conserve les limites lorsque qu'un tag ou une prise de mesure allowed est saisie
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE analyse_allowed
+--
+-- Description : 
+-- analyse allowed refer to association point and analyse type. For persitence
+-- association to a tag is require
+--
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS analyse_allowed;
+GO
+CREATE TABLE analyse_allowed (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,
+  
+  [point]		INT NOT NULL,
+  [type]		INT NOT NULL,
+  [designation] varchar(255) DEFAULT NULL,
+  [enable]		bit DEFAULT 1,						-- Indicate temporarly  not allowed
+  [tag]			INT NOT NULL,						-- Specify default tag for persistence
+  [description] text DEFAULT NULL,
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_analyse_allowed_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_analyse_allowed_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_allowed_point FOREIGN KEY ([point]) REFERENCES analyse_points (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_allowed_type FOREIGN KEY ([type]) REFERENCES analyse_types (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_allowed_tag FOREIGN KEY ([tag]) REFERENCES tags (id) ON UPDATE NO ACTION,
+
+);
+
+GO
+CREATE TRIGGER tgr_analyse_allowed_changed ON analyse_allowed
+	AFTER UPDATE AS UPDATE analyse_allowed
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_analyse_allowed_id ON analyse_allowed (id ASC);
+CREATE INDEX ui_analyse_allowed_company_point_type ON analyse_allowed (company ASC, [point] asc, [type] asc);
+CREATE INDEX i_analyse_allowed_point ON analyse_allowed ([point] ASC);
+CREATE INDEX i_analyse_allowed_type ON analyse_allowed ([type] ASC);
+CREATE INDEX i_analyse_allowed_tag ON analyse_allowed ([tag] ASC);
+CREATE INDEX i_analyse_allowed_created ON analyse_allowed (created ASC);
+CREATE INDEX i_analyse_allowed_changed ON analyse_allowed (changed ASC);
+GO
+RAISERROR (N'==> Table analyse_allowed created !',10,1) WITH NOWAIT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE meas_limits
+--
+-- Description : 
+-- measure limits refer to a description of limtis that are associated to different
+-- element like tags, like analyse,...
+-- Limits are only specify as double event for a Integer tags or value 
+-- applyTo : allow to recognize to which kind of content parameter is applyied
+--		+ 0 : tags
+--		+ 1 : analyse_allowed
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS meas_limits;
+GO
+CREATE TABLE meas_limits (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  business		INT DEFAULT NULL,					-- limit is specify for all buisness
+  company		INT DEFAULT NULL,					-- limit is apply for company only
+  
+  -- Technique one of limit
+  --[applyEnable]	bit DEFAULT 0,						-- Specify if applyTo technique is used
+  --[applyTo]		INT	DEFAULT NULL,						-- specify cleary on which parameter it is applying to
+  --[reference]	INT DEFAULT NULL,						-- specify id for the concerned reference
+
+  -- Direct technique
+  [tag]			INT DEFAULT NULL,					-- in case of tag it is applyied to tags
+  --[analyse]		INT DEFAULT NULL,					-- in cas of analyse_allowed // already reference a tag
+  
+  -- Limit name
+  [name]		varchar(255) DEFAULT NULL,			-- limit can have a name
+
+  [value]		FLOAT(53) DEFAULT 0.0,				-- limit value
+  [comparator]	INT NOT NULL,						-- define when limit is reached
+
+  [delay]		INT DEFAULT 0,						-- indicate in second when limit should be considerate as reached
+  [hysteresis]	FLOAT(53)	DEFAULT 0.0,			-- apply absolute hysteresis on value in order to considerate as reached
+
+  [target]		bit DEFAULT 0,						-- Allow to specify if this limit is the target value research
+  [enable]		bit DEFAULT 1,						-- Indicate if limit is enable
+
+  [group]		INT DEFAULT NULL,					-- insert limit in to a group
+
+  [sort]		INT DEFAULT NULL,					-- Allow to indicate in the tag or analyse to sort order from smaller to bigger	
+
+  [description] text DEFAULT NULL,
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_meas_limits_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_meas_limits_business FOREIGN KEY (business) REFERENCES businesses (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_meas_limits_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_meas_limits_tag FOREIGN KEY ([tag]) REFERENCES tags (id) ON UPDATE NO ACTION,
+  --CONSTRAINT fk_meas_limits_analyse FOREIGN KEY ([analyse]) REFERENCES analyse_allowed (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_meas_limits_comparator FOREIGN KEY ([comparator]) REFERENCES meas_comparators (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_meas_limits_group FOREIGN KEY ([group]) REFERENCES meas_limits_groups (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_meas_limits_changed ON meas_limits
+	AFTER UPDATE AS UPDATE meas_limits
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_meas_limits_id ON meas_limits (id ASC);
+--CREATE INDEX ui_meas_limits_business_company ON meas_limits (business ASC, company ASC, [tag] asc, [analyse]);
+CREATE INDEX ui_meas_limits_business_company ON meas_limits (business ASC, company ASC, [tag] asc);
+CREATE INDEX i_meas_limits_business ON meas_limits (business ASC);
+CREATE INDEX i_meas_limits_company ON meas_limits (company ASC);
+CREATE INDEX i_meas_limits_tag ON meas_limits ([tag] ASC);
+--CREATE INDEX i_meas_limits_analyse ON meas_limits ([analyse] ASC);
+CREATE INDEX i_meas_limits_group ON meas_limits ([group] ASC);
+CREATE INDEX i_meas_limits_created ON meas_limits (created ASC);
+CREATE INDEX i_meas_limits_changed ON meas_limits (changed ASC);
+
+GO 
+RAISERROR (N'==> Table meas_limits created !',10,1) WITH NOWAIT
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE pers_standard_limits
+--
+-- Description : 
+-- persistence standard limits refer to association of persistence and when require
+-- limits are save to register limit at the time. 
+
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS pers_standard_limits;
+GO
+CREATE TABLE pers_standard_limits (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,					-- limit is apply for company only
+  [tag]			INT NOT NULL,					-- in case of tag it is applyied to tags
+  
+  [pers_standard]	INT NOT NULL,				-- Recover associated persistence "main link"
+ 
+  -- Limit name
+  [name]		varchar(255) DEFAULT NULL,			-- limit can have a name
+
+  [value]		FLOAT(53) DEFAULT 0.0,				-- limit value
+  [comparator]	INT NOT NULL,						-- define when limit is reached
+
+  [delay]		INT DEFAULT 0,						-- indicate in second when limit should be considerate as reached
+  [hysteresis]	FLOAT(53)	DEFAULT 0.0,			-- apply absolute hysteresis on value in order to considerate as reached
+
+  [group]		INT DEFAULT NULL,					-- insert limit in to a group
+  [sort]		INT DEFAULT NULL,					-- Allow to indicate in the tag or analyse to sort order from smaller to bigger	
+
+  [hit]			bit default 0,						-- indicate when value limit with comparator is passed
+  [reached]		bit default 0,						-- indicate when value limit with comparator, delay, hysteresis is passed
+  
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_pers_standard_limits_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_pers_standard_limits_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_pers_standard_limits_tag FOREIGN KEY ([tag]) REFERENCES tags (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_pers_standard_limits_pers_standard FOREIGN KEY ([pers_standard]) REFERENCES pers_standard (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_pers_standard_limits_comparator FOREIGN KEY ([comparator]) REFERENCES meas_comparators (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_pers_standard_limits_group FOREIGN KEY ([group]) REFERENCES meas_limits_groups (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_pers_standard_limits_changed ON pers_standard_limits
+	AFTER UPDATE AS UPDATE pers_standard_limits
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_pers_standard_limits_id ON pers_standard_limits (id ASC);
+CREATE INDEX ui_pers_standard_limits_business_company ON pers_standard_limits (company ASC, [tag] asc);
+CREATE INDEX i_pers_standard_limits_pers_standard ON pers_standard_limits ([pers_standard] ASC);
+CREATE INDEX i_pers_standard_limits_company ON pers_standard_limits (company ASC);
+CREATE INDEX i_pers_standard_limits_tag ON pers_standard_limits ([tag] ASC);
+CREATE INDEX i_pers_standard_limits_group ON pers_standard_limits ([group] ASC);
+CREATE INDEX i_pers_standard_limits_hit ON pers_standard_limits ([hit] ASC);
+CREATE INDEX i_pers_standard_limits_reached ON pers_standard_limits ([reached] ASC);
+CREATE INDEX i_pers_standard_limits_created ON pers_standard_limits (created ASC);
+CREATE INDEX i_pers_standard_limits_changed ON pers_standard_limits (changed ASC);
+GO 
+RAISERROR (N'==> Table pers_standard_limits created !',10,1) WITH NOWAIT
+
+
+
+
+
+
+	-- Analyse point requière la gestion équipement
+
+
+-- equipements
+--	equ_id
+--	code
+--	designation
+-- equipements_external
+--	equ_id
+--	external_providerId
+--	
+-- external_providers
+--	external_providerId
+--	source_type	>>BDD
+--	source_categorie >> Dimo // SAP
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- END COMMENT !
+--
+-------------------------------------------------------------------------------
+RAISERROR (N'BDD OBI CREATED !',10,1) WITH NOWAIT
