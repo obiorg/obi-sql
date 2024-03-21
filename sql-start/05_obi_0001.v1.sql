@@ -52,7 +52,8 @@ CREATE TABLE loc_regions (
   wikiDataId varchar(255)   DEFAULT NULL ,
   PRIMARY KEY (id)
 )
-
+GO 
+RAISERROR (N'==> Table loc_regions created !',10,1) WITH NOWAIT
 
 -------------------------------------------------------------------------------
 --
@@ -82,6 +83,7 @@ CREATE TABLE loc_subregions (
 GO
 CREATE INDEX loc_subregion_continent ON loc_subregions (region_id ASC);
 GO 
+RAISERROR (N'==> Table loc_subregions created !',10,1) WITH NOWAIT
 
 
 
@@ -136,6 +138,7 @@ GO
 CREATE  INDEX country_continent ON loc_countries (region_id ASC);
 CREATE  INDEX country_subregion ON loc_countries (subregion_id ASC);
 GO 
+RAISERROR (N'==> Table loc_countries created !',10,1) WITH NOWAIT
 
 
 
@@ -173,6 +176,7 @@ CREATE TABLE loc_states (
 GO
 CREATE INDEX country_region ON loc_states (country_id ASC);
 GO 
+RAISERROR (N'==> Table loc_states created !',10,1) WITH NOWAIT
 
 
 -------------------------------------------------------------------------------
@@ -208,7 +212,8 @@ CREATE TABLE loc_cities(
 GO
 CREATE INDEX loc_cities_test_ibfk_1 ON loc_cities (state_id ASC);
 CREATE INDEX loc_cities_test_ibfk_2 ON loc_cities (country_id ASC);
-GO  
+GO 
+RAISERROR (N'==> Table loc_cities created !',10,1) WITH NOWAIT
 
 
 -------------------------------------------------------------------------------
@@ -273,7 +278,8 @@ CREATE INDEX i_locations_state ON locations (state ASC);
 CREATE INDEX i_locations_city ON locations (city ASC);
 CREATE INDEX i_locations_created ON locations (created ASC);
 CREATE INDEX i_locations_changed ON locations (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table locations created !',10,1) WITH NOWAIT
 
 
 
@@ -333,7 +339,8 @@ CREATE UNIQUE INDEX ui_entities_entity ON entities (entity ASC);
 
 CREATE INDEX i_entities_created ON entities (created ASC);
 CREATE INDEX i_entities_changed ON entities (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table entities created !',10,1) WITH NOWAIT
 
 
 
@@ -409,7 +416,8 @@ CREATE UNIQUE INDEX ui_businesses_business ON businesses (entity ASC, business A
 
 CREATE INDEX i_businesses_created ON businesses (created ASC);
 CREATE INDEX i_businesses_changed ON businesses (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table businesses created !',10,1) WITH NOWAIT
 
 
 
@@ -490,7 +498,8 @@ CREATE UNIQUE INDEX ui_companies_company ON companies (business ASC, company ASC
 
 CREATE INDEX i_companies_created ON companies (created ASC);
 CREATE INDEX i_companies_changed ON companies (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table companies created !',10,1) WITH NOWAIT
 
 
 
@@ -550,7 +559,8 @@ CREATE UNIQUE INDEX ui_user_hashing_algorithms_id ON user_hashing_algorithms (id
 CREATE INDEX i_user_hashing_algorithms_name ON user_hashing_algorithms (algorithmName ASC);
 CREATE INDEX i_user_hashing_algorithms_created ON user_hashing_algorithms (created ASC);
 CREATE INDEX i_user_hashing_algorithms_changed ON user_hashing_algorithms (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_hashing_algorithms created !',10,1) WITH NOWAIT
 
 
 
@@ -593,7 +603,8 @@ CREATE UNIQUE INDEX ui_user_email_verified_id ON user_email_verified (id ASC);
 CREATE INDEX i_user_email_verified_statusDescription ON user_email_verified (statusDescription ASC);
 CREATE INDEX i_user_email_verified_created ON user_email_verified (created ASC);
 CREATE INDEX i_user_email_verified_changed ON user_email_verified (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_email_verified created !',10,1) WITH NOWAIT
 
 
 -------------------------------------------------------------------------------
@@ -659,7 +670,8 @@ CREATE INDEX i_user_login_data_loginName ON user_login_data (loginName ASC);
 CREATE INDEX i_user_login_data_email ON user_login_data (email ASC);
 CREATE INDEX i_user_login_data_created ON user_login_data (created ASC);
 CREATE INDEX i_user_login_data_changed ON user_login_data (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_login_data created !',10,1) WITH NOWAIT
 
 
 
@@ -714,7 +726,8 @@ CREATE UNIQUE INDEX ui_user_external_providers_id ON user_external_providers (id
 CREATE INDEX i_user_external_providers_statusDescription ON user_external_providers ([name] ASC);
 CREATE INDEX i_user_external_providers_created ON user_external_providers (created ASC);
 CREATE INDEX i_user_external_providers_changed ON user_external_providers (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_external_providers created !',10,1) WITH NOWAIT
 
 
 
@@ -761,7 +774,8 @@ CREATE UNIQUE INDEX ui_user_login_data_external_id ON user_login_data_external (
 CREATE INDEX i_user_login_data_external_loginName ON user_login_data_external ([externalProvider] ASC);
 CREATE INDEX i_user_login_data_external_created ON user_login_data_external (created ASC);
 CREATE INDEX i_user_login_data_external_changed ON user_login_data_external (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_login_data_external created !',10,1) WITH NOWAIT
 
 
 
@@ -815,7 +829,8 @@ CREATE INDEX i_user_permissions_designation ON user_permissions (designation ASC
 CREATE INDEX i_user_permissions_parent ON user_permissions (parent ASC);
 CREATE INDEX i_user_permissions_created ON user_permissions (created ASC);
 CREATE INDEX i_user_permissions_changed ON user_permissions (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_permissions created !',10,1) WITH NOWAIT
 
 
 
@@ -877,7 +892,8 @@ CREATE INDEX i_user_roles_name ON user_roles ([name] ASC);
 CREATE INDEX i_user_roles_description ON user_roles ([description] ASC);
 CREATE INDEX i_user_roles_created ON user_roles (created ASC);
 CREATE INDEX i_user_roles_changed ON user_roles (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_roles created !',10,1) WITH NOWAIT
 
 
 
@@ -937,7 +953,8 @@ CREATE INDEX i_user_role_permissions_permission ON user_role_permissions (permis
 CREATE INDEX i_user_role_permissions_role ON user_role_permissions ([role] ASC);
 CREATE INDEX i_user_role_permissions_created ON user_role_permissions (created ASC);
 CREATE INDEX i_user_role_permissions_changed ON user_role_permissions (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_role_permissions created !',10,1) WITH NOWAIT
 
 
 
@@ -997,7 +1014,8 @@ CREATE INDEX i_user_account_genre ON user_account (genre ASC);
 CREATE INDEX i_user_account_dateOfBirth ON user_account (dateOfBirth ASC);
 CREATE INDEX i_user_account_created ON user_account (created ASC);
 CREATE INDEX i_user_account_changed ON user_account (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_account created !',10,1) WITH NOWAIT
 
 
 
@@ -1045,7 +1063,8 @@ CREATE INDEX i_user_account_role_user ON user_account_role ([user] ASC);
 CREATE INDEX i_user_account_role_role ON user_account_role ([role] ASC);
 CREATE INDEX i_user_account_role_created ON user_account_role (created ASC);
 CREATE INDEX i_user_account_role_changed ON user_account_role (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table user_account_role created !',10,1) WITH NOWAIT
 
 
 
@@ -1097,7 +1116,8 @@ CREATE INDEX i_mach_drivers_type ON mach_drivers ([driver] ASC);
 CREATE INDEX i_mach_drivers_designation ON mach_drivers ([designation] ASC);
 CREATE INDEX i_mach_drivers_created ON mach_drivers (created ASC);
 CREATE INDEX i_mach_drivers_changed ON mach_drivers (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table mach_drivers created !',10,1) WITH NOWAIT
 
 
 
@@ -1177,7 +1197,220 @@ CREATE INDEX i_machines_address ON machines ([address] ASC);
 CREATE INDEX i_machines_company_address ON machines (company asc, [address] ASC);
 CREATE INDEX i_machines_created ON machines (created ASC);
 CREATE INDEX i_machines_changed ON machines (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table machines created !',10,1) WITH NOWAIT
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE equipements
+--
+-- Description : 
+-- equipements refer to a specifique element in the company that executing a 
+-- sepecific JOB. 
+--
+-- Exemple(s) : 
+--		A compressor, A pump, Separator, Foam separator, Tank, ...
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS equipements;
+GO
+CREATE TABLE equipements (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,					-- limit is apply for company only
+
+  -- Minimal equipement information
+  [equipement]	VARCHAR(45) NOT NULL,			-- specify a code for recognition
+  [name]		VARCHAR(255)	DEFAULT NULL,	-- define a name of the equipement
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_equipements_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_equipements_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_equipements_changed ON equipements
+	AFTER UPDATE AS UPDATE equipements
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_equipements_id ON equipements (id ASC);
+CREATE INDEX ui_equipements_company_equipement ON equipements (company ASC, [equipement] asc);
+CREATE INDEX i_equipements_equipement ON equipements ([equipement] ASC);
+CREATE INDEX i_equipements_created ON equipements (created ASC);
+CREATE INDEX i_equipements_changed ON equipements (changed ASC);
+GO 
+RAISERROR (N'==> Table equipements created !',10,1) WITH NOWAIT
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE equipements_external_providers
+--
+-- Description : 
+-- 
+--
+-- Exemple(s) : 
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS equipements_external_providers;
+GO
+CREATE TABLE equipements_external_providers (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,					-- limit is apply for company only
+
+  -- Minimal information
+  [provider]	varchar(45) NOT NULL,			-- specify code for the provider
+  [name]		varchar(255) DEFAULT NULL,		-- specify a name for the provider
+
+  [type]		INT DEFAULT NULL,				-- specify type of provider 0: Dimo / 1 : SAP
+
+  -- Specify resources 
+  [sourceType]		INT DEFAULT NULL,				-- should indicate in future which type of source ODBC, SQLServer, CSV File, ...
+  [link]		INT DEFAULT NULL,				-- link to future table source
+
+  -- simplify source
+  [source]		VARCHAR(512) DEFAULT NULL,		-- specify full name link to file, to database,...
+
+  -- Convenient database link
+  [bddServer]		varchar(256) DEFAULT NULL,		-- server name,
+  [bddUser]			varchar(45) DEFAULT NULL,		-- user name,
+  [bddPassword]		varchar(512)	DEFAULT NULL,	-- bdd password
+  [bddPort]			INT DEFAULT NULL,				-- bdd port
+
+
+  -- Resource working
+  [approuved]	bit DEFAULT 0,					-- inidcate test of resource was tested and approved
+
+  -- Configuration parameter for source
+  [paramBool1]		bit DEFAULT NULL,				-- parameter bool to setup
+  [paramBool2]		bit DEFAULT NULL,				-- parameter bool to setup
+  [paramBool3]		bit DEFAULT NULL,				-- parameter bool to setup
+  [paramBool4]		bit DEFAULT NULL,				-- parameter bool to setup
+  [paramBool5]		bit DEFAULT NULL,				-- parameter bool to setup
+
+  [paramInt1]		INT DEFAULT NULL,				-- parameter int to setup
+  [paramInt2]		INT DEFAULT NULL,				-- parameter int to setup
+  [paramInt3]		INT DEFAULT NULL,				-- parameter int to setup
+  [paramInt4]		INT DEFAULT NULL,				-- parameter int to setup
+  [paramInt5]		INT DEFAULT NULL,				-- parameter int to setup
+  
+  [paramStr1]		varchar(45) DEFAULT NULL,		-- parameter string to setup
+  [paramStr2]		varchar(45) DEFAULT NULL,		-- parameter string to setup
+  [paramStr3]		varchar(45) DEFAULT NULL,		-- parameter string to setup
+  [paramStr4]		varchar(45) DEFAULT NULL,		-- parameter string to setup
+  [paramStr5]		varchar(45) DEFAULT NULL,		-- parameter string to setup
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_equipements_external_providers_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_equipements_external_providers_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_equipements_external_providers_changed ON equipements_external_providers
+	AFTER UPDATE AS UPDATE equipements_external_providers
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_equipements_external_providers_id ON equipements_external_providers (id ASC);
+CREATE INDEX ui_equipements_external_providers_company_provider ON equipements_external_providers (company ASC, [provider] asc);
+CREATE INDEX i_equipements_external_providers_provider ON equipements_external_providers ([provider] ASC);
+CREATE INDEX i_equipements_external_providers_created ON equipements_external_providers (created ASC);
+CREATE INDEX i_equipements_external_providers_changed ON equipements_external_providers (changed ASC);
+GO 
+RAISERROR (N'==> Table equipements_external_providers created !',10,1) WITH NOWAIT
+
+
+
+
+
+-------------------------------------------------------------------------------
+--
+-- CREATE TABLE equipements_data_external
+--
+-- Description : 
+-- equipements data external refer to a link with a external sources where 
+-- equipements will be found.
+--
+-- Exemple(s) : link with a source like DIMO or SAP see table equipements_external_provider
+-------------------------------------------------------------------------------
+GO
+DROP TABLE IF EXISTS equipements_data_external;
+GO
+CREATE TABLE equipements_data_external (
+  id		INT	IDENTITY(1,1) UNIQUE,
+  deleted	BIT  DEFAULT 0 ,
+  created	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+  changed	datetime NULL DEFAULT CURRENT_TIMESTAMP ,
+
+  -- Bussiness information
+  company		INT NOT NULL,					-- limit is apply for company only
+
+  -- Minimal equipement information
+  [equipement]	INT NOT NULL,					-- specify a equipement id
+  [provider]	INT NOT NULL,					-- specify a provider id
+
+
+  -- MANAGING KEYS
+  CONSTRAINT pk_equipements_data_external_id PRIMARY KEY CLUSTERED (id asc),
+
+  -- Foreign keys  
+  CONSTRAINT fk_equipements_data_external_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_equipements_data_external_equipements FOREIGN KEY ([equipement]) REFERENCES equipements (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_equipements_data_external_provider FOREIGN KEY ([provider]) REFERENCES equipements_external_providers (id) ON UPDATE NO ACTION,
+);
+
+GO
+CREATE TRIGGER tgr_equipements_data_external_changed ON equipements_data_external
+	AFTER UPDATE AS UPDATE equipements_data_external
+	SET changed = GETDATE()
+	WHERE id IN (SELECT DISTINCT id FROM Inserted)
+GO
+CREATE UNIQUE INDEX ui_equipements_data_external_id ON equipements_data_external (id ASC);
+CREATE INDEX ui_equipements_data_external_company_equipement_provider ON equipements_data_external (company ASC, [equipement] asc, [provider] asc);
+CREATE INDEX i_equipements_data_external_equipement ON equipements_data_external ([equipement] ASC);
+CREATE INDEX i_equipements_data_external_provider ON equipements_data_external ([provider] ASC);
+CREATE INDEX i_equipements_data_external_created ON equipements_data_external (created ASC);
+CREATE INDEX i_equipements_data_external_changed ON equipements_data_external (changed ASC);
+GO 
+RAISERROR (N'==> Table equipements_data_external created !',10,1) WITH NOWAIT
+
+
+
 
 
 
@@ -1230,7 +1463,8 @@ CREATE INDEX i_alarm_groups_company ON alarm_groups ([company] ASC);
 CREATE INDEX i_alarm_groups_group ON alarm_groups ([group] ASC);
 CREATE INDEX i_alarm_groups_created ON alarm_groups (created ASC);
 CREATE INDEX i_alarm_groups_changed ON alarm_groups (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table alarm_groups created !',10,1) WITH NOWAIT
 
 
 
@@ -1295,7 +1529,8 @@ CREATE INDEX i_alarm_render_company ON alarm_render ([company] ASC);
 CREATE INDEX i_alarm_render_render ON alarm_render ([render] ASC);
 CREATE INDEX i_alarm_render_created ON alarm_render (created ASC);
 CREATE INDEX i_alarm_render_changed ON alarm_render (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table alarm_render created !',10,1) WITH NOWAIT
 
 
 
@@ -1356,7 +1591,8 @@ CREATE INDEX i_alarm_classes_company ON alarm_classes ([company] ASC);
 CREATE INDEX i_alarm_classes_class ON alarm_classes ([class] ASC);
 CREATE INDEX i_alarm_classes_created ON alarm_classes (created ASC);
 CREATE INDEX i_alarm_classes_changed ON alarm_classes (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table alarm_classes created !',10,1) WITH NOWAIT
 
 
 
@@ -1416,7 +1652,8 @@ CREATE INDEX i_alarms_company ON alarms ([company] ASC);
 CREATE INDEX i_alarms_alarm ON alarms ([alarm] ASC, [group] asc, class asc);
 CREATE INDEX i_alarms_created ON alarms (created ASC);
 CREATE INDEX i_alarms_changed ON alarms (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table alarms created !',10,1) WITH NOWAIT
 
 
 
@@ -1484,7 +1721,8 @@ CREATE INDEX i_meas_units_entity ON meas_units ([entity] ASC);
 CREATE INDEX i_meas_units_group ON meas_units ([group] ASC);
 CREATE INDEX i_meas_units_created ON meas_units (created ASC);
 CREATE INDEX i_meas_units_changed ON meas_units (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table meas_units created !',10,1) WITH NOWAIT
 
 
 
@@ -1541,6 +1779,7 @@ CREATE INDEX i_meas_comparators_symbol ON meas_comparators ([symbol] ASC);
 CREATE INDEX i_meas_comparators_created ON meas_comparators (created ASC);
 CREATE INDEX i_meas_comparators_changed ON meas_comparators (changed ASC);
 GO 
+RAISERROR (N'==> Table meas_comparators created !',10,1) WITH NOWAIT
 
 
 
@@ -1601,6 +1840,7 @@ CREATE INDEX i_meas_limits_groups_designation ON meas_limits_groups ([designatio
 CREATE INDEX i_meas_limits_groups_created ON meas_limits_groups (created ASC);
 CREATE INDEX i_meas_limits_groups_changed ON meas_limits_groups (changed ASC);
 GO 
+RAISERROR (N'==> Table meas_limits_groups created !',10,1) WITH NOWAIT
 
 
 
@@ -1661,7 +1901,8 @@ CREATE INDEX i_tags_tables_company ON tags_tables ([company] ASC);
 CREATE INDEX i_tags_tables_table ON tags_tables ([table] ASC);
 CREATE INDEX i_tags_tables_created ON tags_tables (created ASC);
 CREATE INDEX i_tags_tables_changed ON tags_tables (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table tags_tables created !',10,1) WITH NOWAIT
 
 
 
@@ -1716,7 +1957,8 @@ CREATE INDEX i_tags_types_type ON tags_types ([type] ASC);
 CREATE INDEX i_tags_types_group ON tags_types ([group] ASC);
 CREATE INDEX i_tags_types_created ON tags_types (created ASC);
 CREATE INDEX i_tags_types_changed ON tags_types (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table tags_types created !',10,1) WITH NOWAIT
 
 
 
@@ -1761,7 +2003,9 @@ CREATE UNIQUE INDEX ui_tags_memories_id ON tags_memories (id ASC);
 CREATE INDEX i_tags_memories_name ON tags_memories ([name] ASC);
 CREATE INDEX i_tags_memories_created ON tags_memories (created ASC);
 CREATE INDEX i_tags_memories_changed ON tags_memories (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table tags_memories created !',10,1) WITH NOWAIT
+
 
 
 
@@ -1912,7 +2156,8 @@ CREATE INDEX i_tags_db ON tags (db asc);
 CREATE INDEX i_tags_byte ON tags (byte asc);
 CREATE INDEX i_tags_created ON tags (created ASC);
 CREATE INDEX i_tags_changed ON tags (changed ASC);
-GO  
+GO 
+RAISERROR (N'==> Table tags created !',10,1) WITH NOWAIT
 
 
 
@@ -2658,21 +2903,6 @@ RAISERROR (N'==> Table pers_standard_limits created !',10,1) WITH NOWAIT
 
 
 
-	-- Analyse point requière la gestion équipement
-
-
--- equipements
---	equ_id
---	code
---	designation
--- equipements_external
---	equ_id
---	external_providerId
---	
--- external_providers
---	external_providerId
---	source_type	>>BDD
---	source_categorie >> Dimo // SAP
 
 
 

@@ -32,9 +32,9 @@
           <FullPath>05_obi_0001.sql</FullPath>
         </FileNode>
         <FileNode Name="05_obi_0001.v1.sql">
-          <AssociatedConnectionMoniker />
-          <AssociatedConnSrvName />
-          <AssociatedConnUserName />
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
           <FullPath>05_obi_0001.v1.sql</FullPath>
         </FileNode>
         <FileNode Name="05_prisma_0001.sql">
@@ -48,6 +48,12 @@
           <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
           <AssociatedConnUserName>sa</AssociatedConnUserName>
           <FullPath>20_obi_fill_0001.sql</FullPath>
+        </FileNode>
+        <FileNode Name="20_obi_fill_0002.sql">
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
+          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <FullPath>20_obi_fill_0002.sql</FullPath>
         </FileNode>
         <FileNode Name="20_prisma_fill_0001.sql">
           <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
