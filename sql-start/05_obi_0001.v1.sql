@@ -2116,7 +2116,7 @@ CREATE TABLE tags (
   alarm 			INT NULL DEFAULT 0,				-- Indicate alarm number or reference
 
   -- Persistence
-  persistence		bit NULL DEFAULT 0,			-- Indicate persistence activate or not / Note need to check cross persistence connection
+  persistenceEnable	bit NULL DEFAULT 0,			-- Indicate persistence activate or not / Note need to check cross persistence connection
   persOffsetEnable	bit NULL DEFAULT 0,			-- Indicate if offset need to be take while persistence apply
   persOffsetFloat	FLOAT(53) NULL DEFAULT 0.0,		-- indicate double value
   persOffsetInt		INT NULL DEFAULT 0,				-- Indicate  an int value
@@ -2634,7 +2634,7 @@ CREATE TABLE analyse_points (
 
   -- Foreign keys  
   CONSTRAINT fk_analyse_points_company FOREIGN KEY (company) REFERENCES companies (id) ON UPDATE NO ACTION,
---  CONSTRAINT fk_analyse_points_equipement FOREIGN KEY ([equipement]) REFERENCES equipements (id) ON UPDATE NO ACTION,
+  CONSTRAINT fk_analyse_points_equipement FOREIGN KEY ([equipement]) REFERENCES equipements (id) ON UPDATE NO ACTION,
 
 );
 

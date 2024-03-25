@@ -11,7 +11,7 @@ INSERT INTO [dbo].[mach_drivers]  ([deleted], [driver], [designation])
 			(0, 'S71200', 'S7-1200'),
 			(0, 'S71500', 'S7-1500')
 GO
-
+RAISERROR (N'==> Table [mach_drivers] created !',10,1) WITH NOWAIT
 
 
 
@@ -36,12 +36,13 @@ INSERT INTO [dbo].[tags_types] ([deleted] ,[type] ,[designation] ,[bit] ,[byte] 
 			(0 ,'WString' ,'Wide String', 0, 0, 0, 'siemens'),
 			(0 ,'Array' ,'Array', 0, 0, 0, 'siemens')
 GO
+RAISERROR (N'==> Table [tags_types] created !',10,1) WITH NOWAIT
 
 
 
 
 -------------------------------------------------------------------------------
--- CREATE TABLE [tags_types]
+-- CREATE TABLE [tags_memories]
 --
 -- Description : inject default known type by the system
 -------------------------------------------------------------------------------
@@ -50,6 +51,7 @@ INSERT INTO [dbo].tags_memories ([deleted] ,[name] ,[comment])
      VALUES (0, 'local', 'local data'),
 			(0, 'db', 'data bloc')
 GO
+RAISERROR (N'==> Table tags_memories created !',10,1) WITH NOWAIT
 
 
 
@@ -63,8 +65,24 @@ GO
 INSERT INTO [dbo].[pers_method]([deleted] ,[name] ,[comment])
      VALUES (0 , 'standard', 'this method save data in persistence standard all new data in a new row')
 GO
+RAISERROR (N'==> Table pers_method created !',10,1) WITH NOWAIT
 
 
 
 
-meas_comparators
+
+
+ -------------------------------------------------------------------------------
+-- CREATE TABLE [meas_comparators]
+--
+-- Description :  >, >=, <, <=, !=, <>
+-------------------------------------------------------------------------------
+INSERT INTO [dbo].[meas_comparators] ([symbol], [name])
+     VALUES ('>',	'Strictement supérieure'),
+			('>=',	'Supérieure ou égale'),
+			('<',	'Strictement inférieure'),
+			('<=',	'Strictement supérieure'),
+			('!=',	'Différent de'),
+			('<>',	'Différent de')
+GO
+RAISERROR (N'==> Table meas_comparators created !',10,1) WITH NOWAIT
