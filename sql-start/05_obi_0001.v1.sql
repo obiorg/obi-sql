@@ -1164,9 +1164,9 @@ CREATE TABLE machines (
   [driver]	INT NOT NULL,
 
   -- MQTT related options informations
-  mqqt		bit DEFAULT 0,						-- mqtt indicate machine is mqtt
-  mqqt_user	VARCHAR(45)	DEFAULT NULL,			-- mqtt option username
-  mqqt_password	VARCHAR(512)	DEFAULT NULL,	-- mqtt option password as code   
+  mqtt		bit DEFAULT 0,						-- mqtt indicate machine is mqtt
+  mqtt_user	VARCHAR(45)	DEFAULT NULL,			-- mqtt option username
+  mqtt_password	VARCHAR(512)	DEFAULT NULL,	-- mqtt option password as code   
 
   -- Webhook 
   webhook			bit DEFAULT 0,				-- Indicate URL is a webhook
@@ -2092,7 +2092,7 @@ CREATE TABLE tags (
   [measureUnit]		INT DEFAULT NULL,				-- Indicate tag unit
 
   -- MQTT related options informations
-  mqqt_topic		VARCHAR(512)	DEFAULT NULL,	-- mqtt topic specify which topics will give this informations and unsure client is created to receive this informations
+  mqtt_topic		VARCHAR(512)	DEFAULT NULL,	-- mqtt topic specify which topics will give this informations and unsure client is created to receive this informations
 
   -- webhook
   webhook			VARCHAR(512)	DEFAULT NULL,	-- webhook data to access referenced by string separated by ":" 
