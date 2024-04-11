@@ -3,6 +3,18 @@
   <Items>
     <LogicalFolder Name="Connexions" Type="2" Sorted="true">
       <Items>
+        <ConnectionNode Name="10.242.14.2\BLCSCADA:obi">
+          <Created>2024-04-06T08:31:00.4621028+01:00</Created>
+          <Type>SQL</Type>
+          <Server>10.242.14.2\BLCSCADA</Server>
+          <UserName>obi</UserName>
+          <Authentication>SQL</Authentication>
+          <InitialDB />
+          <LoginTimeout>30</LoginTimeout>
+          <ExecutionTimeout>0</ExecutionTimeout>
+          <ConnectionProtocol>NotSpecified</ConnectionProtocol>
+          <ApplicationName>Microsoft SQL Server Management Studio - Requête</ApplicationName>
+        </ConnectionNode>
         <ConnectionNode Name="BLCLPT19103:sa">
           <Created>2024-01-14T11:56:24.2123898+01:00</Created>
           <Type>SQL</Type>
@@ -32,9 +44,9 @@
           <FullPath>05_obi_0001.sql</FullPath>
         </FileNode>
         <FileNode Name="05_obi_0001.v1.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
-          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:10.242.14.2\BLCSCADA:False:obi</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>10.242.14.2\BLCSCADA</AssociatedConnSrvName>
+          <AssociatedConnUserName>obi</AssociatedConnUserName>
           <FullPath>05_obi_0001.v1.sql</FullPath>
         </FileNode>
         <FileNode Name="05_prisma_0001.sql">
@@ -50,9 +62,9 @@
           <FullPath>20_obi_fill_0001.sql</FullPath>
         </FileNode>
         <FileNode Name="20_obi_fill_0002.sql">
-          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:BLCLPT19103:False:sa</AssociatedConnectionMoniker>
-          <AssociatedConnSrvName>BLCLPT19103</AssociatedConnSrvName>
-          <AssociatedConnUserName>sa</AssociatedConnUserName>
+          <AssociatedConnectionMoniker>8c91a03d-f9b4-46c0-a305-b5dcc79ff907:10.242.14.2\BLCSCADA:False:obi</AssociatedConnectionMoniker>
+          <AssociatedConnSrvName>10.242.14.2\BLCSCADA</AssociatedConnSrvName>
+          <AssociatedConnUserName>obi</AssociatedConnUserName>
           <FullPath>20_obi_fill_0002.sql</FullPath>
         </FileNode>
         <FileNode Name="20_prisma_fill_0001.sql">

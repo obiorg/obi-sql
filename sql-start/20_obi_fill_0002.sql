@@ -9,7 +9,8 @@ GO
 INSERT INTO [dbo].[mach_drivers]  ([deleted], [driver], [designation])
      VALUES (0, 'S7300_S7400', 'S7-300 / S7-400'),
 			(0, 'S71200', 'S7-1200'),
-			(0, 'S71500', 'S7-1500')
+			(0, 'S71500', 'S7-1500'),
+			(0, 'IM151', 'IM151-8F')
 GO
 RAISERROR (N'==> Table [mach_drivers] created !',10,1) WITH NOWAIT
 
